@@ -7,6 +7,11 @@ try:
     headers = {'User-Agent': 'Mozilla / 5.0(Macintosh;Intel Mac OS X) AppleWebKit / 537.36(KHTML, like Gecko)',
                'Host': 'httpbin.org'}
     dict = {'name':'Tobi'}
+
+    username= 'username'
+    password= 'password'
+
+
     request = urllib.request.Request('http://httpbin.org/post', headers=headers, data=bytes(urllib.parse.urlencode(dict),encoding='utf8'), method='POST')
     print("***************")
     response = urllib.request.urlopen(request, context=ssl._create_unverified_context())
