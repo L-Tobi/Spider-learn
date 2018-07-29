@@ -2,19 +2,20 @@ from urllib.error import URLError
 from urllib.request import ProxyHandler , build_opener
 from test import cookie_test
 
-proxy_handler = ProxyHandler(
-    {
-        'http' : 'http://127.0.0.1:63231',
-        'https' : 'http://127.0.0.1:63231'
-    }
-)
-
-opener = build_opener(proxy_handler)
+# proxy_handler = ProxyHandler(
+#     {
+#         'http' : 'http://127.0.0.1:63231',
+#         'https' : 'http://127.0.0.1:63231'
+#     }
+# )
+#
+# opener = build_opener(proxy_handler)
 try:
-    print("***************1")
-    response = opener.open('https://www.baidu.com')
-    print("***************2")
-    print(response.read().decode('utf-8'))
+    cookie_test.check_robot_txt('https://www.sina.com.cn')
+    # print("***************1")
+    # response = opener.open('https://www.baidu.com')
+    # print("***************2")
+    # print(response.read().decode('utf-8'))
     # headers = {'User-Agent': 'Mozilla / 5.0(Macintosh;Intel Mac OS X) AppleWebKit / 537.36(KHTML, like Gecko)',
     #            'Host': 'httpbin.org'}
     # dict = {'name':'Tobi'}
