@@ -1,5 +1,6 @@
 from urllib.error import URLError
 from urllib.request import ProxyHandler , build_opener
+from test import cookie_test
 
 proxy_handler = ProxyHandler(
     {
