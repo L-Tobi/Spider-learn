@@ -48,7 +48,6 @@ while(True):
        # print('time :', time.asctime(time.localtime(time.time())), end='\n', flush=True)
        # sys.stdout.flush()
        sleep(5)
-       break
     except:
         print('something is wrong')
         sleep(10)
