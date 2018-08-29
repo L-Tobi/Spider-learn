@@ -11,7 +11,7 @@ def get_stock_start(url):
     responses002202 = requests.get(url002202)
    # print(responses002202.text)
     sz002202 = re.search('\金风科技,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', responses002202.text, re.S)
-    print(sz002202)
+   # print(sz002202)
     print('002202  now : ', sz002202.group(3), ' open :' , sz002202.group(1), ' yes :' , sz002202.group(2), ' high :', sz002202.group(4), ' low :' , sz002202.group(5))
     print('sh cur         ', shanghai.group(1), '   price diff: ', shanghai.group(2), '   gr: ', shanghai.group(3),
           '     trade vo :', shanghai.group(4), ' money :', shanghai.group(5))
