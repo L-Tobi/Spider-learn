@@ -15,12 +15,13 @@ from time import sleep
 #url = 'http://maoyan.com/board/4'
 #url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
 
-file = open('002202.txt','w+')
+
 while(True):
     try:
        # url = 'https://hq.sinajs.cn/?rn=1534081330022&list=sz002202,sz002202_i'
        url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
        get_stock_info.get_stock_start(url)
+
      #  html = get_movies_rank.get_one_page(url)
      #  lxml_test.practice_lxml_test(url)
       # print(html.encode('utf-8'))
@@ -51,7 +52,7 @@ while(True):
     except:
         print('something is wrong')
         sleep(10)
-file.close()
+
 #lxml_test.practice_lxml_test(url)
 
 #beautifulsoup_test.practice_beautifulsoup()
