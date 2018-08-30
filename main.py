@@ -32,21 +32,6 @@ while(True):
        #     sleep(1)
        #     continue
        #price = re.match('^var.*,\d.*|', html)
-
-
-
-       # price = re.search(',.*?,.*?,.*?,.*?,.*?,.*?,.*?,' ,html,re.S)
-       # result = price.group(0)
-       # #print(result)
-       # result =  result.split(',')
-       # count = file.write(time.asctime(time.localtime(time.time())))
-       # print(count)
-       # print('current :', result[3], end=' ', flush=True)
-       # print('open :', result[1],end=' ', flush = True)
-       # print('yesterday :', result[2],end=' ', flush = True)
-       # print('highest :', result[4],end=' ', flush = True)
-       # print('lowest :', result[5],end=' ', flush = True)
-       # print('time :', time.asctime(time.localtime(time.time())), end='\n', flush=True)
        # sys.stdout.flush()
        sleep(5)
     except:
