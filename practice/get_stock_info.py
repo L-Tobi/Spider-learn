@@ -34,7 +34,7 @@ def get_stock_start(url):
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     if (current_time > am_start_time and current_time < am_end_time ) or ( current_time > pm_start_time and current_time < pm_end_time):
         file = open('data/002202' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.txt', 'a+')
-        file.write(sz002202.group(3) + ' ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' 002202'+ '\n')
+        file.write(sz002202.group(3) + ' ' + sz002202.group(8) + ' ' + sz002202.group(9) + ' ' + '{0:.5f}'.format(float(sz002202.group(8))/28548070.23) + ' ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' 002202'+ '\n')
         file.write(shanghai.group(1) + ' ' + shanghai.group(2) + ' ' + shanghai.group(3) + ' ' + shanghai.group(
             4) + ' ' + shanghai.group(5) + ' ' + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + ' shanghai' + '\n')
         file.write(shenzhen.group(1) + ' ' + shenzhen.group(2) + ' ' + shenzhen.group(3) + ' ' + shenzhen.group(
