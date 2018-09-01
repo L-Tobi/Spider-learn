@@ -2,7 +2,7 @@ from urllib.request import ProxyHandler , build_opener
 from test import urllib_test
 from test import requests_test
 from test import regex_test
-from practice import get_movies_rank,get_stock_info
+from practice import get_stock_info
 #from test import beautifulsoup_test
 from  test import lxml_test
 import sys
