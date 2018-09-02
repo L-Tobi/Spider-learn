@@ -2,7 +2,7 @@ from urllib.request import ProxyHandler , build_opener
 from test import urllib_test
 from test import requests_test
 from test import regex_test
-from practice import get_stock_info
+from practice import get_stock_info,get_valid_stock_code
 #from test import beautifulsoup_test
 from  test import lxml_test
 import sys
@@ -22,7 +22,6 @@ while(True):
        url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
        get_stock_info.get_stock_start(url)
 
-     #  html = get_movies_rank.get_one_page(url)
      #  lxml_test.practice_lxml_test(url)
       # print(html.encode('utf-8'))
 
