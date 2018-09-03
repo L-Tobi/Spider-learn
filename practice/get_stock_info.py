@@ -13,7 +13,7 @@ def get_stock_start(url):
 
     url002202 = 'https://hq.sinajs.cn/?rn=1534081330022&list=sz002202,sz300098,sz300284'
     responses002202 = requests.get(url002202)
- #   print(responses002202.text)
+    print(responses002202.text)
     sz002202 = re.search('\金风科技,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?).*,(.*?),(.*?),(.*?),.*?"', responses002202.text, re.S)
     sz300098 = re.search('\高新兴,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', responses002202.text,re.S)
     sz300284 = re.search('\苏交科,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', responses002202.text, re.S)
