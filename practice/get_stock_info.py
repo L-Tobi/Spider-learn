@@ -13,7 +13,7 @@ def get_stock_start(url):
 
     url002202 = 'https://hq.sinajs.cn/?rn=1534081330022&list=sz002202,sz300098,sz300284'
     responses002202 = requests.get(url002202)
-    print(responses002202.text)
+ #   print(responses002202.text)
     sz002202 = re.search('\金风科技,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?).*,(.*?),(.*?),(.*?),.*?"', responses002202.text, re.S)
     sz300098 = re.search('\高新兴,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', responses002202.text,re.S)
     sz300284 = re.search('\苏交科,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', responses002202.text, re.S)
@@ -38,25 +38,25 @@ def get_stock_start(url):
     am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:33:00'
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-   # if (current_time > am_start_time and current_time < am_end_time ) or ( current_time > pm_start_time and current_time < pm_end_time):
+    if (current_time > am_start_time and current_time < am_end_time ) or ( current_time > pm_start_time and current_time < pm_end_time):
         #for reduce storage , data should be optimized that cut the same as adjacent data.
-    if(True):
+   # if(True):
 
-        with open('data/002202' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a') as csvfile:
+        with open('data/002202' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
             fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover', 'time']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writerow({'price': sz002202.group(3), 'open': sz002202.group(1),'yesterday' : sz002202.group(2),'highest' : sz002202.group(4),
                              'lowest': sz002202.group(5),'volumn' : sz002202.group(8),'money' : sz002202.group(9),'turnover' : '{0:.5f}'.format(float(sz002202.group(8))/28548070.23),
                              'time': info_time})
 
-        with open('data/300098' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a') as csvfile:
+        with open('data/300098' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
             fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover','time']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writerow({'price': sz300098.group(3), 'open': sz300098.group(1),'yesterday' : sz300098.group(2),'highest' : sz300098.group(4),
                              'lowest': sz300098.group(5),'volumn' : sz300098.group(8),'money' : sz300098.group(9),'turnover' : '{0:.5f}'.format(float(sz300098.group(8))/8864398.31),
                              'time': info_time})
 
-        with open('data/300284' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a') as csvfile:
+        with open('data/300284' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
             fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover','time']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writerow({'price': sz300284.group(3), 'open': sz300284.group(1),'yesterday' : sz300284.group(2),'highest' : sz300284.group(4),
