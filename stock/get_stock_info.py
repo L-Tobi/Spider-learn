@@ -2,6 +2,7 @@ import requests
 import re
 import time
 import csv
+from time import sleep
 def get_stock_start(url):
 
     #ready to merge this code
@@ -98,3 +99,77 @@ def get_stock_start(url):
         # http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=11&symbol=sz002202&rn=25589834
         # https://hq.sinajs.cn/rn=1535390045016&list=s_sh000001,s_sz399001,CFF_RE_IC0,rt_hkHSI,gb_$dji,gb_ixic,b_SX5E,b_UKX,b_NKY,hf_CL,hf_GC,hf_SI,hf_CAD
         # https://hq.sinajs.cn/rn=1535455880338&list=s_sh000001,s_sz399001,s_sh000300,s_sz399415,s_sz399006
+
+
+def get_valid_stock_code(type):
+   # codelist = 'sz002202,sz300098,sz300284'
+    code_list = 'sh000001,s_sh000001'
+
+    if(type == '00'):
+        _index = 0
+        sz_code_list = ''
+        sz_count = 0
+        while _index < 3000:
+            url = 'https://hq.sinajs.cn/?rn=1534081330022&list=' + 'sz00' + str(_index).zfill(4)
+            results = requests.get(url)
+            #print (results.text)
+            is_exists = re.search('"(.*)"',results.text ,re.S)
+
+            if(is_exists.group(1) == ''):
+                print ('null')
+            else:
+                print (is_exists.group(1))
+                sz_count = sz_count + 1
+                sz_code_list += 'sz00' + str(_index).zfill(4)
+                with open('sz_code_list.txt', 'a') as file:
+                    file.write("sz00" + str(_index).zfill(4) + '\n')
+            _index = _index + 1
+            sleep(2)
+        print (sz_code_list)
+        print (' total ' + str(sz_count))
+    elif(type == '30'):
+        _index = 0
+        sz_code_list = ''
+        sz_count = 0
+        while _index < 1000:
+            url = 'https://hq.sinajs.cn/?rn=1534081330022&list=' + 'sz30' + str(_index).zfill(4)
+            results = requests.get(url)
+            # print (results.text)
+            is_exists = re.search('"(.*)"', results.text, re.S)
+
+            if (is_exists.group(1) == ''):
+                print ('null')
+            else:
+                print (is_exists.group(1))
+                sz_count = sz_count + 1
+                sz_code_list += 'sz30' + str(_index).zfill(4)
+                with open('sz_code_list.txt', 'a') as file:
+                    file.write("sz30" + str(_index).zfill(4) + '\n')
+            _index = _index + 1
+            sleep(2)
+        print (sz_code_list)
+        print (' total ' + str(sz_count))
+    elif(type== '60'):
+        _index = 0
+        sh_code_list = ''
+        sh_count = 0
+        while _index < 3900:
+            url = 'https://hq.sinajs.cn/?rn=1534081330022&list=' + 'sh60' + str(_index).zfill(4)
+            results = requests.get(url)
+            # print (results.text)
+            is_exists = re.search('"(.*)"', results.text, re.S)
+
+            if (is_exists.group(1) == ''):
+                print ('null')
+            else:
+                print (is_exists.group(1))
+                sh_count = sh_count + 1
+                sh_code_list += 'sh60' + str(_index).zfill(4)
+                with open('sz_code_list.txt', 'a') as file:
+                    file.write("sh60" + str(_index).zfill(4) + '\n')
+            _index = _index + 1
+            sleep(2)
+        print (sh_code_list)
+        print (' total ' + str(sh_count))
+
+    return
