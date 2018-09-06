@@ -15,16 +15,16 @@ from time import sleep
 #url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
 
 
-#while(True):
-    # try:
+while(True):
+    try:
        # url = 'https://hq.sinajs.cn/?rn=1534081330022&list=sz002202,sz002202_i'
-       # url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
-       # get_stock_info.get_stock_start(url)
-get_stock_info.get_valid_stock_code('60')
-    #    sleep(5)
-    # except:
-    #     print('something is wrong')
-    #     sleep(10)
+        url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
+        get_stock_info.get_stock_start(url)
+#get_stock_info.get_valid_stock_code('60')
+        sleep(5)
+    except:
+         print('something is wrong')
+         sleep(10)
 
 #lxml_test.practice_lxml_test(url)
 
