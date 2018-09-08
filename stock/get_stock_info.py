@@ -3,7 +3,51 @@ import re
 import time
 import csv
 from time import sleep
-def get_stock_start(url):
+
+# https://hq.sinajs.cn/rn=1536422971108&list=s_sh000001,s_sz399001,CFF_RE_IC0,rt_hkHSI,gb_$dji,gb_ixic,b_SX5E,b_UKX,b_NKY,hf_CL,hf_GC,hf_SI,hf_CAD
+
+def get_stock_codes_info():
+    code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+    with open('sz_code_list.txt','r') as file_code_list:
+        index = 0
+        while(True):
+            current_code = file_code_list.readline()
+            if (not current_code):
+                code_list = re.sub('\n', '', code_list)
+                code_list = code_list[:-1]
+                all_codes_info = requests.get(code_list)
+                code_results =  all_codes_info.text.split(';')
+                for code_item in code_results:
+                    if (code_item == '\n'):
+                        break
+                    code_item_result = re.search('hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', code_item, re.S)
+                    print (code_item_result.group(1),code_item_result.group(2),code_item_result.group(3),code_item_result.group(4),code_item_result.group(5),code_item_result.group(6),code_item_result.group(7),code_item_result.group(8),code_item_result.group(9), code_item_result.group(10))
+
+                break
+            elif(index == 750):
+                index = 0
+                code_list = code_list + current_code + ','
+                code_list = re.sub('\n', '', code_list)
+                code_list = code_list[:-1]
+                all_codes_info = requests.get(code_list)
+                code_list = 'https://hq.sinajs.cn/rn?=1536422971108&list='
+                code_results =  all_codes_info.text.split(';')
+                for code_item in code_results:
+                    if (code_item == '\n'):
+                        break
+                    code_item_result = re.search('hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', code_item, re.S)
+                    print (code_item_result.group(1),code_item_result.group(2),code_item_result.group(3),code_item_result.group(4),code_item_result.group(5),code_item_result.group(6),code_item_result.group(7),code_item_result.group(8),code_item_result.group(9), code_item_result.group(10))
+                sleep(2)
+            else:
+                code_list = code_list + current_code + ','
+                index = index + 1
+
+    # print(code_list)
+    # all_codes_info = requests.get(code_list)
+    # print (all_codes_info.text)
+
+'''
+    while(True):
 
     #ready to merge this code
     #responses = requests.get('https://hq.sinajs.cn/rn=1535455880338&list=s_sh000001,s_sz399001,s_sh000300,s_sz399415,s_sz399006')
@@ -41,7 +85,6 @@ def get_stock_start(url):
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     if (current_time > am_start_time and current_time < am_end_time ) or ( current_time > pm_start_time and current_time < pm_end_time):
-        #for reduce storage , data should be optimized that cut the same as adjacent data.
    # if(True):
         #while item in code_list:
 
@@ -53,6 +96,8 @@ def get_stock_start(url):
         #                      'lowest': stock_code.group(5), 'volumn': stock_code.group(8), 'money': stock_code.group(9),
         #                      'turnover': '{0:.5f}'.format(float(stock_code.group(8)) / 28548070.23),
         #                      'time': info_time})
+
+
 
 
         with open('data/002202' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
@@ -101,7 +146,7 @@ def get_stock_start(url):
         # https://hq.sinajs.cn/rn=1535390045016&list=s_sh000001,s_sz399001,CFF_RE_IC0,rt_hkHSI,gb_$dji,gb_ixic,b_SX5E,b_UKX,b_NKY,hf_CL,hf_GC,hf_SI,hf_CAD
         # https://hq.sinajs.cn/rn=1535455880338&list=s_sh000001,s_sz399001,s_sh000300,s_sz399415,s_sz399006
 
-
+'''
 def get_valid_stock_code(type):
    # codelist = 'sz002202,sz300098,sz300284'
     code_list = 'sh000001,s_sh000001'
