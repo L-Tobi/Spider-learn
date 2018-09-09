@@ -42,49 +42,7 @@ def get_stock_codes_info():
                        code_item_result.group(10))
             sleep(2)
         sleep(6)
-'''
-def get_stock_codes_info():
-    code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-    with open('sz_code_list.txt','r') as file_code_list:
-        index = 0
-        while(True):
-            current_code = file_code_list.readline()
-            if (not current_code):
-                code_list = re.sub('\n', '', code_list)
-                code_list = code_list[:-1]
-                all_codes_info = requests.get(code_list)
-                code_results =  all_codes_info.text.split(';')
-                for code_item in code_results:
-                    if (code_item == '\n'):
-                        break
-                    code_item_result = re.search('hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', code_item, re.S)
-                    print (code_item_result.group(1),code_item_result.group(2),code_item_result.group(3),code_item_result.group(4),code_item_result.group(5),code_item_result.group(6),code_item_result.group(7),code_item_result.group(8),code_item_result.group(9), code_item_result.group(10))
-                index = 0
-                code_list = 'https://hq.sinajs.cn/rn?=1536422971108&list='
-                sleep(5)
-                continue
-            elif(index == 750):
-                index = 0
-                code_list = code_list + current_code + ','
-                code_list = re.sub('\n', '', code_list)
-                code_list = code_list[:-1]
-                all_codes_info = requests.get(code_list)
-                code_list = 'https://hq.sinajs.cn/rn?=1536422971108&list='
-                code_results =  all_codes_info.text.split(';')
-                for code_item in code_results:
-                    if (code_item == '\n'):
-                        break
-                    code_item_result = re.search('hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', code_item, re.S)
-                    print (code_item_result.group(1),code_item_result.group(2),code_item_result.group(3),code_item_result.group(4),code_item_result.group(5),code_item_result.group(6),code_item_result.group(7),code_item_result.group(8),code_item_result.group(9), code_item_result.group(10))
-                sleep(2)
-            else:
-                code_list = code_list + current_code + ','
-                index = index + 1
 
-    # print(code_list)
-    # all_codes_info = requests.get(code_list)
-    # print (all_codes_info.text)
-'''
 '''
     while(True):
 

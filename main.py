@@ -9,7 +9,7 @@ import re
 import time
 from time import sleep
 from test import proxy_test
-
+from database import operation
 
 #urllib_test.check_robot_txt('https://www.sina.com.cn')
 #requests_test.requests_test()
@@ -18,8 +18,8 @@ from test import proxy_test
 
 
 #try:
-get_stock_info.get_stock_codes_info()
-
+# get_stock_info.get_stock_codes_info()
+operation.create_database(get_stock_info)
     #get_stock_info.get_valid_stock_code('60')
 #except:
  #   print('something is wrong')
