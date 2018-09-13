@@ -43,6 +43,9 @@ def get_stock_codes_info():
             sleep(2)
         sleep(6)
 
+def get_stock_code_basis_info():
+    results = requests.get('https://hq.sinajs.cn/rn=1536855958080&list=sz002202_i')
+    print (results.text)
 '''
     while(True):
 
