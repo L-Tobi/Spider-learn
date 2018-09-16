@@ -21,7 +21,8 @@ from database import operation
 # get_stock_info.get_stock_codes_info()
 #operation.create_database("STOCK_INFO")
 #operation.create_table('test')
-get_stock_info.get_stock_code_basis_info()
+# get_stock_info.get_stock_code_basis_info(True)
+get_stock_info.get_stock_code_summary_info(True)
     #get_stock_info.get_valid_stock_code('60')
 #except:
  #   print('something is wrong')

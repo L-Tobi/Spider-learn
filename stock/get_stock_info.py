@@ -3,26 +3,35 @@ import re
 import time
 import csv
 from time import sleep
+from database import operation
 
 code_index = 0
 code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 all_code_list = []
+all_code_basis_list = []
 with open('sz_code_list.txt','r') as file_code_list:
     for code_info in file_code_list:
         if(not code_info):
             print ('end')
-        elif(code_index == 750):
+        elif(code_index == 700):
             code_index = 0
             current_code = re.sub('\n', '', code_info)
             code_list = code_list + current_code
+            code_basis_list = code_basis_list + current_code + '_i'
             all_code_list.append(code_list)
+            all_code_basis_list.append(code_basis_list)
+            code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
             code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
         else:
             current_code = re.sub('\n', '', code_info)
             code_list = code_list + current_code + ','
+            code_basis_list = code_basis_list + current_code + '_i' + ','
             code_index = code_index + 1
     all_code_list.append(code_list)
-    print (all_code_list)
+    all_code_basis_list.append(code_basis_list)
+    # print (all_code_list)
+    # print (all_code_basis_list)
 
 
 def get_stock_codes_info():
@@ -36,6 +45,8 @@ def get_stock_codes_info():
                 code_item_result = re.search(
                     'hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?',
                     code_item, re.S)
+                if (code_item_result == None):
+                    continue
                 print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
                        code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
                        code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
@@ -43,9 +54,74 @@ def get_stock_codes_info():
             sleep(2)
         sleep(6)
 
-def get_stock_code_basis_info():
-    results = requests.get('https://hq.sinajs.cn/rn=1536855958080&list=sz002202_i')
-    print (results.text)
+def get_stock_code_basis_info(is_store_data=False):
+    operation.create_table('stock_basis_info','basis')
+    for code_list_item in all_code_basis_list:
+        current_code_basis_info = requests.get(code_list_item)
+        # print (current_code_basis_info.text)
+        code_basis_results = current_code_basis_info.text.split(';')
+        for code_item in code_basis_results:
+            if (code_item == '\n'):
+                break
+            if(code_item == 'None'):
+                continue
+            code_item_result = re.search(
+                'hq_str_.*?(\d+)_i=".*?,.*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?',
+                code_item, re.S)
+            if (is_store_data):
+                insert_data = (code_item_result.group(1), code_item_result.group(2),code_item_result.group(3),
+                               code_item_result.group(5), code_item_result.group(7), code_item_result.group(8),
+                               code_item_result.group(12), code_item_result.group(13),code_item_result.group(14))
+                print (insert_data)
+                operation.insert_table('stock_basis_info', 'basis', insert_data)
+                # operation.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
+            else:
+                print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
+                   code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
+                   code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
+                   code_item_result.group(10),code_item_result.group(11),code_item_result.group(12),
+                   code_item_result.group(13),code_item_result.group(14),code_item_result.group(15))
+        sleep(2)
+
+def get_stock_code_summary_info(is_store_data=False):
+    for code_list_item in all_code_list:
+        current_code_info = requests.get(code_list_item)
+        code_results = current_code_info.text.split(';')
+        for code_item in code_results:
+            if (code_item == '\n'):
+                break
+            code_item_result = re.search(
+                'hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),.*,(.*?),(.*?),(.*?)',
+                code_item, re.S)
+            if (code_item_result == None):
+                continue
+            if (is_store_data):
+
+                #open,yesterday,close,high,low,buy,sale,volumn,money
+                currcapital = operation.find_stock_basis_info(code_item_result.group(1))
+                volumn = float(code_item_result.group(9))
+                if (currcapital == 0):
+                    turnover = 0
+                else:
+                    turnover = volumn/currcapital/100
+                # print (code_item_result.group(1) , ' turnover ' , turnover)
+                insert_data = (code_item_result.group(2), code_item_result.group(3), code_item_result.group(4),
+                               code_item_result.group(5), code_item_result.group(6), code_item_result.group(7),
+                               code_item_result.group(8), code_item_result.group(9), code_item_result.group(10),
+                               '{0:.5f}'.format(float(turnover)))#, code_item_result.group(13))
+                print(insert_data)
+                operation.create_table(code_item_result.group(1) + '_summary', 'summary')
+                operation.insert_table(code_item_result.group(1) + '_summary', 'summary', insert_data)
+            else:
+                print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
+                   code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
+                   code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
+                   code_item_result.group(10))
+        sleep(2)
+
+
+
+
 '''
     while(True):
 
