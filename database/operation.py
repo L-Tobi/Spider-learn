@@ -21,8 +21,20 @@ def create_table(name,type):
         try:
             # sql = 'DROP TABLE ' + name
             # cursor.execute(sql)
-            sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (open float, yesterday float, close float, high float, low float, buy float, sale float, volumn double, money double, turnover float)'
+            sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (open float, yesterday float, close float, high float, low float, buy float, sale float, volumn double, money double, turnover float, time date)'
+            # sql = 'ALTER TABLE ' + name + ' ADD time date'
             cursor.execute(sql)
+            # sql = 'SHOW COLUMNS FROM ' + name
+            # cursor.execute(sql)
+
+            # sql = 'SELECT * FROM '+ name
+            # cursor.execute(sql)
+            # row = cursor.fetchone()
+
+            # sql = 'UPDATE ' + name + ' SET time = %s '
+            # cursor.execute(sql, '2018-09-14')
+            # db.commit()
+            # print (cursor.fetchone())
         except Exception as e:
             print (str(e))
     elif(type == 'basis'): #all stock basic info stores in one table
@@ -39,7 +51,7 @@ def insert_table(name,type,data):
     # db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
     # cursor = db.cursor()
     if (type == 'summary'):
-        sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
         print (sql)
         try:
             print (data)
@@ -67,7 +79,7 @@ def update_stock_basis_info(data):
     try:
         cursor.execute(sql, data)
         db.commit()
-    except e:
+    except  e:
         db.rollback()
         print ('update basis info error!', e)
 
@@ -75,6 +87,7 @@ def update_stock_basis_info(data):
 
 def find_stock_basis_info(code_id):
     sql = 'SELECT * FROM stock_basis_info WHERE code_id = ' + code_id
+
     cursor.execute(sql)
     row = cursor.fetchone()
     while row is not None:

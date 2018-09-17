@@ -108,10 +108,10 @@ def get_stock_code_summary_info(is_store_data=False):
                 insert_data = (code_item_result.group(2), code_item_result.group(3), code_item_result.group(4),
                                code_item_result.group(5), code_item_result.group(6), code_item_result.group(7),
                                code_item_result.group(8), code_item_result.group(9), code_item_result.group(10),
-                               '{0:.5f}'.format(float(turnover)))#, code_item_result.group(13))
-                print(insert_data)
+                               '{0:.5f}'.format(float(turnover)), code_item_result.group(13))
+                # print(insert_data)
                 operation.create_table(code_item_result.group(1) + '_summary', 'summary')
-                operation.insert_table(code_item_result.group(1) + '_summary', 'summary', insert_data)
+                # operation.insert_table(code_item_result.group(1) + '_summary', 'summary', insert_data)
             else:
                 print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
                    code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
