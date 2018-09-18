@@ -19,22 +19,9 @@ def create_table(name,type):
     # cursor = db.cursor()
     if(type == 'summary'):
         try:
-            # sql = 'DROP TABLE ' + name
-            # cursor.execute(sql)
             sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (open float, yesterday float, close float, high float, low float, buy float, sale float, volumn double, money double, turnover float, time date)'
             # sql = 'ALTER TABLE ' + name + ' ADD time date'
             cursor.execute(sql)
-            # sql = 'SHOW COLUMNS FROM ' + name
-            # cursor.execute(sql)
-
-            # sql = 'SELECT * FROM '+ name
-            # cursor.execute(sql)
-            # row = cursor.fetchone()
-
-            # sql = 'UPDATE ' + name + ' SET time = %s '
-            # cursor.execute(sql, '2018-09-14')
-            # db.commit()
-            # print (cursor.fetchone())
         except Exception as e:
             print (str(e))
     elif(type == 'basis'): #all stock basic info stores in one table
@@ -74,6 +61,15 @@ def insert_table(name,type,data):
         print ('realtime')
 
 
+def delete_table(name):
+    try:
+        sql = 'DROP TABLE ' + name
+        cursor.execute(sql)
+    except Exception as e:
+        db.rollback()
+        print ('delete error!', str(e))
+
+
 def update_stock_basis_info(data):
     sql = 'UPDATE stock_basis_info SET totalcapital = %s, currcapital = %s WHERE code_id = %s'
     try:
@@ -85,14 +81,26 @@ def update_stock_basis_info(data):
 
 
 
-def find_stock_basis_info(code_id):
-    sql = 'SELECT * FROM stock_basis_info WHERE code_id = ' + code_id
+def find_stock_basis_info(code_id,type,item='*',content=''):
+    if (type == 'summary'):
+        sql = 'SELECT ' + item + ' FROM ' + code_id + '_summary' + ' WHERE ' + content
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        while row is not None:
+            if(item=='*'):
+                return row
+            else:
+                return row[0]
 
-    cursor.execute(sql)
-    row = cursor.fetchone()
-    while row is not None:
-        result = row[5]
-        return result
-    return 0
+    if (type == 'basis'):
+        sql = 'SELECT '+ item + ' FROM stock_basis_info WHERE code_id = ' + code_id
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        while row is not None:
+            if(item=='*'):
+                return row
+            else:
+                return row[0]
+    return None
 
 

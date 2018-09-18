@@ -98,20 +98,26 @@ def get_stock_code_summary_info(is_store_data=False):
             if (is_store_data):
 
                 #open,yesterday,close,high,low,buy,sale,volumn,money
-                currcapital = operation.find_stock_basis_info(code_item_result.group(1))
+                currcapital = operation.find_stock_basis_info(code_item_result.group(1),'basis',item='currcapital',content='code_id = ' + code_item_result.group(1))
+
                 volumn = float(code_item_result.group(9))
                 if (currcapital == 0):
                     turnover = 0
                 else:
                     turnover = volumn/currcapital/100
+                # print (code_item_result.group(1) , turnover)
                 # print (code_item_result.group(1) , ' turnover ' , turnover)
                 insert_data = (code_item_result.group(2), code_item_result.group(3), code_item_result.group(4),
                                code_item_result.group(5), code_item_result.group(6), code_item_result.group(7),
                                code_item_result.group(8), code_item_result.group(9), code_item_result.group(10),
                                '{0:.5f}'.format(float(turnover)), code_item_result.group(13))
                 # print(insert_data)
-                operation.create_table(code_item_result.group(1) + '_summary', 'summary')
-                # operation.insert_table(code_item_result.group(1) + '_summary', 'summary', insert_data)
+                # operation.create_table(code_item_result.group(1) + '_summary', 'summary')
+                database_date = operation.find_stock_basis_info(code_item_result.group(1),'summary',item='time',content= 'time = ' + re.sub('-','',code_item_result.group(13)))
+                if (database_date == None):
+                    operation.insert_table(code_item_result.group(1) + '_summary', 'summary', insert_data)
+                else:
+                    print ('data has exists, cannot insert repeatly!')
             else:
                 print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
                    code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
