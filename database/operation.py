@@ -30,7 +30,8 @@ def create_table(name,type):
         sql = 'CREATE TABLE IF NOT EXISTS stock_basis_info (code_id int, lastyear_mgsy float, fourQ_mgsy float, mgjzc float, totalcapital double, currcapital double, profit float, profit_four float, issue_price float)'
         cursor.execute(sql)
     elif(type == 'realtime'):
-        sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (price float, money double, volumn double, turnover float)'
+        sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (price float, money double, volumn double, turnover float, time datetime)'
+        cursor.execute(sql)
     # db.close()
 
 
@@ -49,6 +50,7 @@ def insert_table(name,type,data):
             print ('insert summary data error!' + str(e))
         # db.close()
     elif(type == 'basis'):
+        #需要市盈率信息
         sql = 'INSERT INTO stock_basis_info (code_id, lastyear_mgsy, fourQ_mgsy, mgjzc, totalcapital, currcapital, profit, profit_four, issue_price ) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
         try:
             cursor.execute(sql, data)
@@ -58,6 +60,7 @@ def insert_table(name,type,data):
             print ('insert basis data error!' + str(e))
         # db.close()
     elif (tpye == 'realtime'):
+        sql = 'INSERT INTO ' + name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
         print ('realtime')
 
 

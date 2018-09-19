@@ -47,6 +47,9 @@ def get_stock_codes_info():
                     code_item, re.S)
                 if (code_item_result == None):
                     continue
+
+                #刷新最高价时对应区间price的数字，并更新进入数据库
+                #创建表以年为单位
                 print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
                        code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
                        code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),

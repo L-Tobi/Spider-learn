@@ -22,15 +22,16 @@ am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:33:00'
 
 collect_summary_data = True
 #try:
-# get_stock_info.get_stock_codes_info()
-#operation.create_database("STOCK_INFO")
-#operation.create_table('test')
 # get_stock_info.get_stock_code_basis_info(True)
 
+all_current_strock_info = []
 
 while(True):
 
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    # if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
+    get_stock_info.get_stock_codes_info()
 
     if (current_time > pm_end_time and collect_summary_data):
         get_stock_info.get_stock_code_summary_info(True)
