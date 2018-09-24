@@ -34,7 +34,10 @@ with open('sz_code_list.txt','r') as file_code_list:
     # print (all_code_basis_list)
 
 
-def get_stock_codes_info():
+def get_stock_codes_info(current_time):
+    time_change = True
+    minute_data = []
+    today_data=[]
     while(True):
         for code_list_item in all_code_list:
             current_code_info = requests.get(code_list_item)
@@ -43,17 +46,32 @@ def get_stock_codes_info():
                 if (code_item == '\n'):
                     break
                 code_item_result = re.search(
-                    'hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?',
+                    'hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),.*,(.*?),(.*?),(.*?)',
                     code_item, re.S)
                 if (code_item_result == None):
                     continue
 
+
+                if(time_change):
+                    compare_time = code_item_result.group(13) + ' ' + code_item_result.group(14)[:-2] + '59'
+                    time_change = False
+                record_time = code_item_result.group(13)+' ' + code_item_result.group(14)
+
+                real_time_data = ()
+
+                if(record_time > compare_time):
+                    time_change = True
+                    #add data to today
+                    minute_data = []
+
+
                 #刷新最高价时对应区间price的数字，并更新进入数据库
                 #创建表以年为单位
-                print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
-                       code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
-                       code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
-                       code_item_result.group(10))
+                # print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
+                #        code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
+                #        code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
+                #        code_item_result.group(10),code_item_result.group(13),code_item_result.group(14))
+
             sleep(2)
         sleep(6)
 
@@ -191,40 +209,6 @@ def get_stock_code_summary_info(is_store_data=False):
             writer.writerow({'price': sz002202.group(3), 'open': sz002202.group(1),'yesterday' : sz002202.group(2),'highest' : sz002202.group(4),
                              'lowest': sz002202.group(5),'volumn' : sz002202.group(8),'money' : sz002202.group(9),'turnover' : '{0:.5f}'.format(float(sz002202.group(8))/28548070.23),
                              'time': info_time})
-
-        with open('data/300098' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover','time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz300098.group(3), 'open': sz300098.group(1),'yesterday' : sz300098.group(2),'highest' : sz300098.group(4),
-                             'lowest': sz300098.group(5),'volumn' : sz300098.group(8),'money' : sz300098.group(9),'turnover' : '{0:.5f}'.format(float(sz300098.group(8))/8864398.31),
-                             'time': info_time})
-
-        with open('data/300284' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover','time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz300284.group(3), 'open': sz300284.group(1),'yesterday' : sz300284.group(2),'highest' : sz300284.group(4),
-                             'lowest': sz300284.group(5),'volumn' : sz300284.group(8),'money' : sz300284.group(9),'turnover' : '{0:.5f}'.format(float(sz300284.group(8))/5142442.65),
-                             'time': info_time})
-
-        with open('data/000001' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price','change','increase','volumn','money','time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sh000001.group(1), 'change': sh000001.group(2),'increase' : sh000001.group(3),'volumn' : sh000001.group(4), 'money': sh000001.group(5), 'time': info_time})
-
-        with open('data/399001' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price', 'change', 'increase', 'volumn', 'money', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz399001.group(1), 'change': sz399001.group(2),'increase' : sz399001.group(3),'volumn' : sz399001.group(4), 'money': sz399001.group(5), 'time': info_time})
-
-        with open('data/399415' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price', 'change', 'increase', 'volumn', 'money', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz399415.group(1), 'change': sz399415.group(2),'increase' : sz399415.group(3),'volumn' : sz399415.group(4), 'money': sz399415.group(5), 'time': info_time})
-
-        with open('data/399006' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price', 'change', 'increase', 'volumn', 'money', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz399006.group(1), 'change': sz399006.group(2),'increase' : sz399006.group(3),'volumn' : sz399006.group(4), 'money': sz399006.group(5), 'time': info_time})
 
         # https://hq.sinajs.cn/rn=1535371925672&list=s_sh000001,s_sz399001,CFF_RE_IC0,rt_hkHSI,gb_$dji,gb_ixic,b_SX5E,b_UKX,b_NKY,hf_CL,hf_GC,hf_SI,hf_CAD
         # http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=11&symbol=sz002202&rn=25589834

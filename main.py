@@ -31,7 +31,7 @@ while(True):
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     # if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
-    get_stock_info.get_stock_codes_info()
+    get_stock_info.get_stock_codes_info(current_time)
 
     if (current_time > pm_end_time and collect_summary_data):
         get_stock_info.get_stock_code_summary_info(True)
