@@ -3,7 +3,154 @@ import re
 import time
 import csv
 from time import sleep
-def get_stock_start(url):
+from database import operation
+
+code_index = 0
+code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+all_code_list = []
+all_code_basis_list = []
+with open('sz_code_list.txt','r') as file_code_list:
+    for code_info in file_code_list:
+        if(not code_info):
+            print ('end')
+        elif(code_index == 700):
+            code_index = 0
+            current_code = re.sub('\n', '', code_info)
+            code_list = code_list + current_code
+            code_basis_list = code_basis_list + current_code + '_i'
+            all_code_list.append(code_list)
+            all_code_basis_list.append(code_basis_list)
+            code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+            code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+        else:
+            current_code = re.sub('\n', '', code_info)
+            code_list = code_list + current_code + ','
+            code_basis_list = code_basis_list + current_code + '_i' + ','
+            code_index = code_index + 1
+    all_code_list.append(code_list)
+    all_code_basis_list.append(code_basis_list)
+    # print (all_code_list)
+    # print (all_code_basis_list)
+
+
+def get_stock_codes_info(current_time):
+    time_change = True
+    minute_data = []
+    today_data=[]
+    while(True):
+        for code_list_item in all_code_list:
+            current_code_info = requests.get(code_list_item)
+            code_results = current_code_info.text.split(';')
+            for code_item in code_results:
+                if (code_item == '\n'):
+                    break
+                code_item_result = re.search(
+                    'hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),.*,(.*?),(.*?),(.*?)',
+                    code_item, re.S)
+                if (code_item_result == None):
+                    continue
+
+
+                if(time_change):
+                    compare_time = code_item_result.group(13) + ' ' + code_item_result.group(14)[:-2] + '59'
+                    time_change = False
+                record_time = code_item_result.group(13)+' ' + code_item_result.group(14)
+
+                real_time_data = ()
+
+                if(record_time > compare_time):
+                    time_change = True
+                    #add data to today
+                    minute_data = []
+
+
+                #刷新最高价时对应区间price的数字，并更新进入数据库
+                #创建表以年为单位
+                # print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
+                #        code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
+                #        code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
+                #        code_item_result.group(10),code_item_result.group(13),code_item_result.group(14))
+
+            sleep(2)
+        sleep(6)
+
+def get_stock_code_basis_info(is_store_data=False):
+    operation.create_table('stock_basis_info','basis')
+    for code_list_item in all_code_basis_list:
+        current_code_basis_info = requests.get(code_list_item)
+        # print (current_code_basis_info.text)
+        code_basis_results = current_code_basis_info.text.split(';')
+        for code_item in code_basis_results:
+            if (code_item == '\n'):
+                break
+            if(code_item == 'None'):
+                continue
+            code_item_result = re.search(
+                'hq_str_.*?(\d+)_i=".*?,.*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?',
+                code_item, re.S)
+            if (is_store_data):
+                insert_data = (code_item_result.group(1), code_item_result.group(2),code_item_result.group(3),
+                               code_item_result.group(5), code_item_result.group(7), code_item_result.group(8),
+                               code_item_result.group(12), code_item_result.group(13),code_item_result.group(14))
+                print (insert_data)
+                operation.insert_table('stock_basis_info', 'basis', insert_data)
+                # operation.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
+            else:
+                print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
+                   code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
+                   code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
+                   code_item_result.group(10),code_item_result.group(11),code_item_result.group(12),
+                   code_item_result.group(13),code_item_result.group(14),code_item_result.group(15))
+        sleep(2)
+
+def get_stock_code_summary_info(is_store_data=False):
+    for code_list_item in all_code_list:
+        current_code_info = requests.get(code_list_item)
+        code_results = current_code_info.text.split(';')
+        for code_item in code_results:
+            if (code_item == '\n'):
+                break
+            code_item_result = re.search(
+                'hq_str_.*?(\d+)=".*?,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),.*,(.*?),(.*?),(.*?)',
+                code_item, re.S)
+            if (code_item_result == None):
+                continue
+            if (is_store_data):
+
+                #open,yesterday,close,high,low,buy,sale,volumn,money
+                currcapital = operation.find_stock_basis_info(code_item_result.group(1),'basis',item='currcapital',content='code_id = ' + code_item_result.group(1))
+
+                volumn = float(code_item_result.group(9))
+                if (currcapital == 0):
+                    turnover = 0
+                else:
+                    turnover = volumn/currcapital/100
+                # print (code_item_result.group(1) , turnover)
+                # print (code_item_result.group(1) , ' turnover ' , turnover)
+                insert_data = (code_item_result.group(2), code_item_result.group(3), code_item_result.group(4),
+                               code_item_result.group(5), code_item_result.group(6), code_item_result.group(7),
+                               code_item_result.group(8), code_item_result.group(9), code_item_result.group(10),
+                               '{0:.5f}'.format(float(turnover)), code_item_result.group(13))
+                # print(insert_data)
+                # operation.create_table(code_item_result.group(1) + '_summary', 'summary')
+                database_date = operation.find_stock_basis_info(code_item_result.group(1),'summary',item='time',content= 'time = ' + re.sub('-','',code_item_result.group(13)))
+                if (database_date == None):
+                    operation.insert_table(code_item_result.group(1) + '_summary', 'summary', insert_data)
+                else:
+                    print ('data has exists, cannot insert repeatly!')
+            else:
+                print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
+                   code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
+                   code_item_result.group(7), code_item_result.group(8), code_item_result.group(9),
+                   code_item_result.group(10))
+        sleep(2)
+
+
+
+
+'''
+    while(True):
 
     #ready to merge this code
     #responses = requests.get('https://hq.sinajs.cn/rn=1535455880338&list=s_sh000001,s_sz399001,s_sh000300,s_sz399415,s_sz399006')
@@ -41,7 +188,6 @@ def get_stock_start(url):
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
     if (current_time > am_start_time and current_time < am_end_time ) or ( current_time > pm_start_time and current_time < pm_end_time):
-        #for reduce storage , data should be optimized that cut the same as adjacent data.
    # if(True):
         #while item in code_list:
 
@@ -55,6 +201,8 @@ def get_stock_start(url):
         #                      'time': info_time})
 
 
+
+
         with open('data/002202' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
             fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover', 'time']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -62,46 +210,12 @@ def get_stock_start(url):
                              'lowest': sz002202.group(5),'volumn' : sz002202.group(8),'money' : sz002202.group(9),'turnover' : '{0:.5f}'.format(float(sz002202.group(8))/28548070.23),
                              'time': info_time})
 
-        with open('data/300098' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover','time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz300098.group(3), 'open': sz300098.group(1),'yesterday' : sz300098.group(2),'highest' : sz300098.group(4),
-                             'lowest': sz300098.group(5),'volumn' : sz300098.group(8),'money' : sz300098.group(9),'turnover' : '{0:.5f}'.format(float(sz300098.group(8))/8864398.31),
-                             'time': info_time})
-
-        with open('data/300284' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover','time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz300284.group(3), 'open': sz300284.group(1),'yesterday' : sz300284.group(2),'highest' : sz300284.group(4),
-                             'lowest': sz300284.group(5),'volumn' : sz300284.group(8),'money' : sz300284.group(9),'turnover' : '{0:.5f}'.format(float(sz300284.group(8))/5142442.65),
-                             'time': info_time})
-
-        with open('data/000001' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price','change','increase','volumn','money','time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sh000001.group(1), 'change': sh000001.group(2),'increase' : sh000001.group(3),'volumn' : sh000001.group(4), 'money': sh000001.group(5), 'time': info_time})
-
-        with open('data/399001' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price', 'change', 'increase', 'volumn', 'money', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz399001.group(1), 'change': sz399001.group(2),'increase' : sz399001.group(3),'volumn' : sz399001.group(4), 'money': sz399001.group(5), 'time': info_time})
-
-        with open('data/399415' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price', 'change', 'increase', 'volumn', 'money', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz399415.group(1), 'change': sz399415.group(2),'increase' : sz399415.group(3),'volumn' : sz399415.group(4), 'money': sz399415.group(5), 'time': info_time})
-
-        with open('data/399006' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-            fieldnames = ['price', 'change', 'increase', 'volumn', 'money', 'time']
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writerow({'price': sz399006.group(1), 'change': sz399006.group(2),'increase' : sz399006.group(3),'volumn' : sz399006.group(4), 'money': sz399006.group(5), 'time': info_time})
-
         # https://hq.sinajs.cn/rn=1535371925672&list=s_sh000001,s_sz399001,CFF_RE_IC0,rt_hkHSI,gb_$dji,gb_ixic,b_SX5E,b_UKX,b_NKY,hf_CL,hf_GC,hf_SI,hf_CAD
         # http://vip.stock.finance.sina.com.cn/quotes_service/view/CN_TransListV2.php?num=11&symbol=sz002202&rn=25589834
         # https://hq.sinajs.cn/rn=1535390045016&list=s_sh000001,s_sz399001,CFF_RE_IC0,rt_hkHSI,gb_$dji,gb_ixic,b_SX5E,b_UKX,b_NKY,hf_CL,hf_GC,hf_SI,hf_CAD
         # https://hq.sinajs.cn/rn=1535455880338&list=s_sh000001,s_sz399001,s_sh000300,s_sz399415,s_sz399006
 
-
+'''
 def get_valid_stock_code(type):
    # codelist = 'sz002202,sz300098,sz300284'
     code_list = 'sh000001,s_sh000001'

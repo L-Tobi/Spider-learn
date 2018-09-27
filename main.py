@@ -3,28 +3,43 @@ from test import urllib_test
 from test import requests_test
 from test import regex_test
 from stock import get_stock_info
-#from test import beautifulsoup_test
 from  test import lxml_test
 import sys
 import re
 import time
 from time import sleep
+from test import proxy_test
+from database import operation
+
 #urllib_test.check_robot_txt('https://www.sina.com.cn')
 #requests_test.requests_test()
 #regex_test.practice_regex()
-#url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
 
+pm_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '12:57:00'
+pm_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '15:03:00'
+am_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '09:23:00'
+am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:33:00'
+
+collect_summary_data = True
+#try:
+# get_stock_info.get_stock_code_basis_info(True)
+
+all_current_strock_info = []
 
 while(True):
-    try:
-       # url = 'https://hq.sinajs.cn/?rn=1534081330022&list=sz002202,sz002202_i'
-        url = 'http://finance.sina.com.cn/realstock/company/sz002202/nc.shtml'
-        get_stock_info.get_stock_start(url)
-#get_stock_info.get_valid_stock_code('60')
-        sleep(5)
-    except:
-         print('something is wrong')
-         sleep(10)
+
+    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+
+    # if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
+    get_stock_info.get_stock_codes_info(current_time)
+
+    if (current_time > pm_end_time and collect_summary_data):
+        get_stock_info.get_stock_code_summary_info(True)
+        collect_summary_data = False
+    #get_stock_info.get_valid_stock_code('60')
+#except:
+ #   print('something is wrong')
+ #   sleep(10)
 
 #lxml_test.practice_lxml_test(url)
 
