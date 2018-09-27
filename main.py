@@ -34,7 +34,7 @@ while(True):
     get_stock_info.get_stock_codes_info(current_time)
 
     if (current_time > pm_end_time and collect_summary_data):
-        get_stock_info.get_stock_code_summary_info(True)
+        # get_stock_info.get_stock_code_summary_info(True)
         collect_summary_data = False
     #get_stock_info.get_valid_stock_code('60')
 #except:
