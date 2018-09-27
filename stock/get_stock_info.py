@@ -38,6 +38,14 @@ def get_stock_codes_info(current_time):
     time_change = True
     minute_data = []
     today_data=[]
+    all_code_today_high = {}
+    all_code_today_low = {}
+    all_code_currcapital = {}
+    with open('sz_code_list.txt', 'r') as file_code_list:
+        for code_info in file_code_list:
+            all_code_currcapital[code_info[2:]] = operation.find_stock_basis_info(code_info[2:], 'basis', item='currcapital',
+                                                      content='code_id = ' + code_info[2:])
+
     while(True):
         for code_list_item in all_code_list:
             current_code_info = requests.get(code_list_item)
@@ -57,13 +65,22 @@ def get_stock_codes_info(current_time):
                     time_change = False
                 record_time = code_item_result.group(13)+' ' + code_item_result.group(14)
 
-                real_time_data = ()
-
+                real_time_data = (code_item_result.group(4), code_item_result.group(6), record_time[:-3])
+                if(code_item_result.group(1) == '002202'):
+                    all_code_today_high[code_item_result.group(1)] = code_item_result.group(5)
+                    all_code_today_low[code_item_result.group(1)] = code_item_result.group(6)
+                    print(real_time_data , all_code_today_high[code_item_result.group(1)] , all_code_today_low[code_item_result.group(1)]  )
+                #     记录最高和最低价出现时间
                 if(record_time > compare_time):
                     time_change = True
+                    currcapital = all_code_currcapital[code_item_result.group(1)]
+                    volumn = float(code_item_result.group(9))
+                    if (currcapital == 0):
+                        turnover = 0
+                    else:
+                        turnover = volumn / currcapital / 100
                     #add data to today
                     minute_data = []
-
 
                 #刷新最高价时对应区间price的数字，并更新进入数据库
                 #创建表以年为单位
