@@ -15,10 +15,10 @@ from database import operation
 #requests_test.requests_test()
 #regex_test.practice_regex()
 
-pm_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '12:57:00'
-pm_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '15:03:00'
-am_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '09:23:00'
-am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:33:00'
+pm_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '13:00:00'
+pm_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '15:01:00'
+am_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '09:30:00'
+am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:31:00'
 
 collect_summary_data = True
 #try:
@@ -30,8 +30,8 @@ while(True):
 
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
 
-    # if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
-    get_stock_info.get_stock_codes_info(current_time)
+    if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
+        get_stock_info.get_stock_codes_info(current_time)
 
     if (current_time > pm_end_time and collect_summary_data):
         # get_stock_info.get_stock_code_summary_info(True)

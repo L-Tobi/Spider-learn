@@ -6,8 +6,6 @@ from time import sleep
 from database import operation
 
 #待修改地方
-#数据库读出流通股数
-#限制时间刷新
 #数据插入数据库 实时更新数据以及最高最低值数据
 #防止网络意外退出功能, 将数据优先写入本地磁盘
 
@@ -52,16 +50,19 @@ def get_stock_codes_info(current_time):
     with open('sz_code_list.txt', 'r') as file_code_list:
         for code_info in file_code_list:
             code_info = re.sub('\n', '', code_info)
-            all_code_currcapital[code_info[2:]] = 1# operation.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
+            all_code_currcapital[code_info[2:]] = operation.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
             all_code_today_info[code_info[2:]] = [0,current_time,100000,current_time]
             all_code_real_price[code_info[2:]] = []
             all_code_real_price_temp[code_info[2:]] = [0,0,current_time]
             all_code_compare_time[code_info[2:]] = [True, current_time]
     while(True):
         for code_list_item in all_code_list:
-            current_code_info = requests.get(code_list_item)
-            code_results = current_code_info.text.split(';')
-
+            try:
+                current_code_info = requests.get(code_list_item)
+                code_results = current_code_info.text.split(';')
+            except Exception as e:
+                print(str(e))
+                continue
             for code_item in code_results:
                 if (code_item == '\n'):
                     break
@@ -203,59 +204,6 @@ def get_stock_code_summary_info(is_store_data=False):
 
 
 '''
-    while(True):
-
-    #ready to merge this code
-    #responses = requests.get('https://hq.sinajs.cn/rn=1535455880338&list=s_sh000001,s_sz399001,s_sh000300,s_sz399415,s_sz399006')
-
-    code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list=s_sh000001,s_sz399001,s_sh000300,s_sz399006,sz002202,sz300098,sz300284'
-    results_list = requests.get(code_list)
-    # print(results_list.text)
-
-    sh000001 = re.search('\上证指数,(.*?),(.*?),(.*?),(\d+),(\d+)?', results_list.text, re.S)
-    sz399001 = re.search('\深证成指,(.*?),(.*?),(.*?),(\d+),(\d+)?' ,results_list.text, re.S)
-    sz399415 = re.search('\沪深300,(.*?),(.*?),(.*?),(\d+),(\d+)?', results_list.text, re.S)
-    sz399006 = re.search('\创业板指,(.*?),(.*?),(.*?),(\d+),(\d+)?', results_list.text, re.S)
-    sz002202 = re.search('\金风科技,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?).*,(.*?),(.*?),(.*?),.*?"', results_list.text, re.S)
-    sz300098 = re.search('\高新兴,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', results_list.text,re.S)
-    sz300284 = re.search('\苏交科,(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?),(.*?)?', results_list.text, re.S)
-
-    info_time = sz002202.group(12) + ' ' + sz002202.group(13)
-
-    print('002202  now : '.ljust(15) + sz002202.group(3).ljust(10)+ 'open :'.ljust(10) + sz002202.group(1).ljust(10)+ 'yes :'.ljust(10)+ sz002202.group(2).ljust(10)+
-          'high :'.ljust(10)+ sz002202.group(4).ljust(10)+ ' low :'.ljust(10) + sz002202.group(5).ljust(10), 'trade vo : '.ljust(10) + sz002202.group(8).ljust(10) +
-          'money :'.ljust(6) + sz002202.group(9).ljust(15) + 'turnover rate:'.ljust(12) + '{0:.3f}'.format(float(sz002202.group(8))/28548070.23))
-    print('sh cur '.ljust(15)+ sh000001.group(1).ljust(10)+ 'price diff: '.ljust(10) + sh000001.group(2).ljust(10) + 'gr: '.ljust(5) + sh000001.group(3).ljust(10) +
-          'trade vo :'.ljust(10) + sh000001.group(4).ljust(10) + 'money :'.ljust(10) + sh000001.group(5).ljust(10) )
-    print('sz cur  :'.ljust(15)+ sz399001.group(1).ljust(10)+ 'price diff: '.ljust(10)+ sz399001.group(2).ljust(10)+ 'gr: '.ljust(5)+ sz399001.group(3).ljust(10)+
-          'trade vo :'.ljust(10)+ sz399001.group(4).ljust(10)+ 'money :'.ljust(10)+ sz399001.group(5).ljust(10))
-    print('hush300 cur:'.ljust(15) + sz399415.group(1).ljust(10)+ 'price diff: '.ljust(10)+ sz399415.group(2).ljust(10)+ 'gr: '.ljust(5)+ sz399415.group(3).ljust(10)+
-          'trade vo :'.ljust(10)+ sz399415.group(4).ljust(10)+ 'money :'.ljust(10)+ sz399415.group(5).ljust(10))
-    print('300 cur:'.ljust(15) + sz399006.group(1).ljust(10)+ 'price diff: '.ljust(10)+ sz399006.group(2).ljust(10)+ 'gr: '.ljust(5)+ sz399006.group(3).ljust(10)+
-          'trade vo :'.ljust(10)+ sz399006.group(4).ljust(10)+ 'money :'.ljust(10)+ sz399006.group(5).ljust(10))
-    print('=====================================================================')
-    pm_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '12:57:00'
-    pm_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '15:03:00'
-    am_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '09:23:00'
-    am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:33:00'
-    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
-    if (current_time > am_start_time and current_time < am_end_time ) or ( current_time > pm_start_time and current_time < pm_end_time):
-   # if(True):
-        #while item in code_list:
-
-        # with open('data/' + stock_code + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
-        #     fieldnames = ['price', 'open', 'yesterday', 'highest', 'lowest', 'volumn', 'money', 'turnover', 'time']
-        #     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #     writer.writerow({'price': stock_code.group(3), 'open': stock_code.group(1), 'yesterday': stock_code.group(2),
-        #                      'highest': stock_code.group(4),
-        #                      'lowest': stock_code.group(5), 'volumn': stock_code.group(8), 'money': stock_code.group(9),
-        #                      'turnover': '{0:.5f}'.format(float(stock_code.group(8)) / 28548070.23),
-        #                      'time': info_time})
-
-
-
-
         with open('data/002202' + ' ' + time.strftime("%Y-%m-%d", time.localtime()) + '.csv', 'a',newline='') as csvfile:
             fieldnames = ['price','open','yesterday','highest','lowest','volumn','money','turnover', 'time']
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
