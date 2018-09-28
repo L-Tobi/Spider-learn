@@ -5,6 +5,12 @@ import csv
 from time import sleep
 from database import operation
 
+#待修改地方
+#数据库读出流通股数
+#限制时间刷新
+#数据插入数据库 实时更新数据以及最高最低值数据
+#防止网络意外退出功能, 将数据优先写入本地磁盘
+
 code_index = 0
 code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
@@ -39,20 +45,23 @@ def get_stock_codes_info(current_time):
     minute_data = []
     today_data=[]
     all_code_today_info = {}
+    all_code_compare_time = {}
     all_code_real_price = {}
     all_code_real_price_temp = {}
     all_code_currcapital = {}
     with open('sz_code_list.txt', 'r') as file_code_list:
         for code_info in file_code_list:
             code_info = re.sub('\n', '', code_info)
-            all_code_currcapital[code_info[2:]] = operation.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
+            all_code_currcapital[code_info[2:]] = 1# operation.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
             all_code_today_info[code_info[2:]] = [0,current_time,100000,current_time]
             all_code_real_price[code_info[2:]] = []
             all_code_real_price_temp[code_info[2:]] = [0,0,current_time]
+            all_code_compare_time[code_info[2:]] = [True, current_time]
     while(True):
         for code_list_item in all_code_list:
             current_code_info = requests.get(code_list_item)
             code_results = current_code_info.text.split(';')
+
             for code_item in code_results:
                 if (code_item == '\n'):
                     break
@@ -63,28 +72,38 @@ def get_stock_codes_info(current_time):
                     continue
 
 
-                if(time_change):
-                    compare_time = code_item_result.group(13) + ' ' + code_item_result.group(14)[:-2] + '59'
-                    time_change = False
+                if(all_code_compare_time[code_item_result.group(1)][0]):
+                    all_code_compare_time[code_item_result.group(1)][1] = code_item_result.group(13) + ' ' + code_item_result.group(14)[:-2] + '59'
+                    all_code_compare_time[code_item_result.group(1)][0] = False
                 record_time = code_item_result.group(13)+' ' + code_item_result.group(14)
 
                 real_time_data = (code_item_result.group(4), code_item_result.group(6), record_time[:-3])
-                if(code_item_result.group(1) == '002202'):
-                    if (float(code_item_result.group(5)) > all_code_today_info[code_item_result.group(1)][0]):
-                        all_code_today_info[code_item_result.group(1)][0] = float(code_item_result.group(5))
-                        all_code_today_info[code_item_result.group(1)][1] = record_time[:-3]
-                    if(float(code_item_result.group(6)) < all_code_today_info[code_item_result.group(1)][2]):
-                        all_code_today_info[code_item_result.group(1)][2] = float(code_item_result.group(6))
-                        all_code_today_info[code_item_result.group(1)][3] = record_time[:-3]
 
-
-                    print(real_time_data , all_code_today_info[code_item_result.group(1)])
+                if (float(code_item_result.group(5)) > all_code_today_info[code_item_result.group(1)][0]):
+                    all_code_today_info[code_item_result.group(1)][0] = float(code_item_result.group(5))
+                    all_code_today_info[code_item_result.group(1)][1] = record_time[:-3]
+                    print('high ' , code_item_result.group(1) , all_code_today_info[code_item_result.group(1)][1])
+                if(float(code_item_result.group(6)) < all_code_today_info[code_item_result.group(1)][2]):
+                    all_code_today_info[code_item_result.group(1)][2] = float(code_item_result.group(6))
+                    all_code_today_info[code_item_result.group(1)][3] = record_time[:-3]
+                    print('low ', code_item_result.group(1) , all_code_today_info[code_item_result.group(1)][3])
+                if (code_item_result.group(1) == '002202'):
+                    print(record_time , all_code_compare_time[code_item_result.group(1)][1])
                 #     记录最高和最低价出现时间
-                if(record_time > compare_time):
+                if(record_time > all_code_compare_time[code_item_result.group(1)][1]):
                     # add data to today
-                    time_change = True
-                    final_data = (all_code_real_price_temp[code_item_result.group(1)])
-                    all_code_real_price[code_item_result.group(1)] = all_code_real_price[code_item_result.group(1)].append(final_data)
+                    all_code_compare_time[code_item_result.group(1)][0] = True
+
+
+                    final_data = (all_code_real_price_temp[code_item_result.group(1)][0],
+                                  all_code_real_price_temp[code_item_result.group(1)][1],
+                                  all_code_real_price_temp[code_item_result.group(1)][2])
+
+                    all_code_real_price[code_item_result.group(1)].append(final_data)
+                    # print(all_code_real_price)
+                    if (code_item_result.group(1) == '002202'):
+                        print(all_code_real_price['002202'])
+                        # print(real_time_data, all_code_today_info[code_item_result.group(1)])
 
 
                 currcapital = all_code_currcapital[code_item_result.group(1)]
