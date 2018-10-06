@@ -2,7 +2,8 @@ from urllib.request import ProxyHandler , build_opener
 from test import urllib_test
 from test import requests_test
 from test import regex_test
-from stock import get_stock_info
+from finance import get_stock_info
+from finance import get_exchange_rate_info
 from  test import lxml_test
 import sys
 import re
@@ -23,9 +24,9 @@ am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:31:00'
 collect_summary_data = True
 #try:
 # get_stock_info.get_stock_code_basis_info(True)
-
+get_exchange_rate_info.get_exchange_rate()
 all_current_strock_info = []
-
+'''
 while(True):
 
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -46,3 +47,4 @@ while(True):
 #beautifulsoup_test.practice_beautifulsoup()\
 
 
+'''
