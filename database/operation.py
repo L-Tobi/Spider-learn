@@ -1,7 +1,7 @@
-# import pymysql
+import pymysql
 
-# db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-# cursor = db.cursor()
+db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
+cursor = db.cursor()
 
 def create_database(name):
     # db = pymysql.connect(host='localhost',user='root',password='123456',port=3306)
@@ -25,12 +25,14 @@ def create_table(name,type):
         except Exception as e:
             print (str(e))
     elif(type == 'basis'): #all stock basic info stores in one table
-        # sql = 'DROP TABLE stock_basis_info'
-        # cursor.execute(sql)
         sql = 'CREATE TABLE IF NOT EXISTS stock_basis_info (code_id int, lastyear_mgsy float, fourQ_mgsy float, mgjzc float, totalcapital double, currcapital double, profit float, profit_four float, issue_price float)'
         cursor.execute(sql)
     elif(type == 'realtime'):
         sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (price float, money double, volumn double, turnover float, time datetime)'
+        cursor.execute(sql)
+    elif(type == 'exchange_rate'):
+        sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (united_arab_emirates float, australian float, brazil float, canada float, switzerland float, denmark float, europe float, english float, hongkong float, indonesia float, india float, japan float, south_korea float,' \
+                                                     ' pataca float, norway float, new_zealand float, philippines float, russia float, saudi_arabia float, sweden float, singapore float, thailand float, turkey float, taiwan float, american float, south_africa float, time datetime)'
         cursor.execute(sql)
     # db.close()
 
@@ -59,9 +61,18 @@ def insert_table(name,type,data):
             db.rollback()
             print ('insert basis data error!' + str(e))
         # db.close()
-    elif (tpye == 'realtime'):
+    elif (type == 'realtime'):
         sql = 'INSERT INTO ' + name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
         print ('realtime')
+    elif (type == 'exchange_rate'):
+        sql = 'INSERT INTO ' + name + '(united_arab_emirates, australian, brazil, canada, switzerland, denmark, europe, english, hongkong, indonesia, india, japan, south_korea, pataca, norway, new_zealand, philippines, russia, saudi_arabia, sweden, singapore, thailand, turkey, taiwan, american, south_africa, time)' \
+                                      ' values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        try:
+            cursor.execute(sql, data)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print ('insert exchange_rate data error! ' + str(e))
 
 
 def delete_table(name):
@@ -106,4 +117,12 @@ def find_stock_basis_info(code_id,type,item='*',content=''):
                 return row[0]
     return None
 
-
+def find_exchange_rate_info(item='*', content=''):
+    sql = 'SELECT ' + item + ' FROM exchange_rate_recorder_info ' + content
+    cursor.execute(sql)
+    row = cursor.fetchone()
+    while row is not None:
+        if (item == '*'):
+            return row
+        else:
+            return row[0]
