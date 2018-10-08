@@ -26,7 +26,7 @@ collect_summary_data = True
 # get_stock_info.get_stock_code_basis_info(True)
 get_exchange_rate_info.get_exchange_rate()
 all_current_strock_info = []
-'''
+
 while(True):
 
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -35,7 +35,7 @@ while(True):
         get_stock_info.get_stock_codes_info(current_time)
 
     if (current_time > pm_end_time and collect_summary_data):
-        # get_stock_info.get_stock_code_summary_info(True)
+        get_stock_info.get_stock_code_summary_info(True)
         collect_summary_data = False
     #get_stock_info.get_valid_stock_code('60')
 #except:
@@ -45,6 +45,3 @@ while(True):
 #lxml_test.practice_lxml_test(url)
 
 #beautifulsoup_test.practice_beautifulsoup()\
-
-
-'''

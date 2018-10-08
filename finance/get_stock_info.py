@@ -127,7 +127,14 @@ def get_stock_codes_info(current_time):
                 #        code_item_result.group(10),code_item_result.group(13),code_item_result.group(14))
 
             sleep(2)
+        if (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) > time.strftime("%Y-%m-%d ", time.localtime()) + '15:01:00'):
+            #insert data and end of functions
+
+
+
+            break
         sleep(6)
+
 
 def get_stock_code_basis_info(is_store_data=False):
     operation.create_table('stock_basis_info','basis')

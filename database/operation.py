@@ -63,7 +63,12 @@ def insert_table(name,type,data):
         # db.close()
     elif (type == 'realtime'):
         sql = 'INSERT INTO ' + name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
-        print ('realtime')
+        try:
+            cursor.execute(sql, data)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print ('insert realtime data error!' + str(e))
     elif (type == 'exchange_rate'):
         sql = 'INSERT INTO ' + name + '(united_arab_emirates, australian, brazil, canada, switzerland, denmark, europe, english, hongkong, indonesia, india, japan, south_korea, pataca, norway, new_zealand, philippines, russia, saudi_arabia, sweden, singapore, thailand, turkey, taiwan, american, south_africa, time)' \
                                       ' values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
