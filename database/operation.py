@@ -1,7 +1,7 @@
 import pymysql
 
-db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-cursor = db.cursor()
+# db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
+# cursor = db.cursor()
 
 def create_database(name):
     # db = pymysql.connect(host='localhost',user='root',password='123456',port=3306)
