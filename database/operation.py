@@ -1,7 +1,7 @@
 import pymysql
 
-# db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-# cursor = db.cursor()
+db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
+cursor = db.cursor()
 
 def create_database(name):
     # db = pymysql.connect(host='localhost',user='root',password='123456',port=3306)
@@ -110,7 +110,16 @@ def find_stock_basis_info(code_id,type,item='*',content=''):
                 return row
             else:
                 return row[0]
-
+    if (type == 'realtime'):
+        table_name = code_id +  '_realtime_' +  time.strftime("%Y", time.localtime())
+        sql = 'SELECT ' + item + ' FROM ' + table_name + content
+        cursor.execute(sql)
+        row = cursor.fetchone()
+        while row is not None:
+            if (item == '*'):
+                return row
+            else:
+                return row[0]
     if (type == 'basis'):
         sql = 'SELECT '+ item + ' FROM stock_basis_info WHERE code_id = ' + code_id
         cursor.execute(sql)

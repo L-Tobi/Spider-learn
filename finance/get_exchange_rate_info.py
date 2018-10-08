@@ -18,26 +18,18 @@ def get_exchange_rate():
     for i,th in enumerate( soup.div.find_all(name='tr')):
         if (i > 1  and i < 16) or (i > 16  and  i < 29):
             try:
-                # print (th.find_all(name='td')[current_exchange_rate])
-                # print (th.find_all(name='td')[current_exchange_rate_date])
-                # print (th.find_all(name='td')[current_exchange_rate_seconds])
                 current_record_exchange_rate_time = th.find_all(name='td')[current_exchange_rate_date].string + ' ' + th.find_all(name='td')[current_exchange_rate_seconds].string
                 data.append(th.find_all(name='td')[current_exchange_rate].string)
                 if (current_record_exchange_rate_time != last_record_exchange_rate_time and i == 28):
                     last_record_exchange_rate_time = current_record_exchange_rate_time
                     data.append(current_record_exchange_rate_time)
-                    # if('2018-10-07 00:00:05' > current_record_exchange_rate_time):
-                    #     print ('true')
-                    # else:
-                    #     print ('false')
-                    #insert time data into database
             except Exception as e:
                 print (str(e), i)
 
     insert_data = tuple(data)
-    recorder_time = operation.find_exchange_rate_info(item='time',content='limit 1')
-    if(str(recorder_time) != last_record_exchange_rate_time):
-        # operation.insert_table('exchange_rate_recorder_info', 'exchange_rate', insert_data)
-        print ('insert exchange_rate ' + insert_data)
+    recorder_time = operation.find_exchange_rate_info(item='max(time)',content='')
+    if(str(recorder_time) < last_record_exchange_rate_time):
+        operation.insert_table('exchange_rate_recorder_info', 'exchange_rate', insert_data)
+        print ('insert exchange_rate ' ,recorder_time, last_record_exchange_rate_time)
 
 
