@@ -144,8 +144,9 @@ def get_stock_codes_info(current_time):
                 for item in values:
                     print('insert data ' , item)
                     if(str(item[4]) > str(item[4])[:-5] + '15:03:00'):
+                        print ('data error ! forbid to insert')
                         break
-                    operation.insert_table(table_name,'realtime',item)
+                    # operation.insert_table(table_name,'realtime',item)
 
             for key, value in all_code_today_info.items():
                 if(float(value[0]) != 0):

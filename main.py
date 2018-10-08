@@ -8,6 +8,7 @@ from  test import lxml_test
 import sys
 import re
 import time
+import threading
 from datetime import datetime
 from time import sleep
 from test import proxy_test
@@ -30,6 +31,16 @@ all_current_strock_info = []
 
 exchange_rate_time = datetime.now()
 
+def get_realtime_stock_info():
+    while(True):
+        current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+        if (current_time > am_start_time and current_time < am_end_time) or (
+                current_time > pm_start_time and current_time < pm_end_time):
+            get_stock_info.get_stock_codes_info(current_time)
+        sleep(10000)
+
+thread_realtime = threading.Thread(target=get_realtime_stock_info)
+thread_realtime.start()
 
 while(True):
     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
@@ -37,9 +48,7 @@ while(True):
     if ((datetime.now() - exchange_rate_time).seconds > 300):
         get_exchange_rate_info.get_exchange_rate()
         exchange_rate_time = datetime.now()
-    # if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
-    #     get_stock_info.get_stock_codes_info(current_time)
-    #
+
     if (current_time > pm_end_time and collect_summary_data):
         get_stock_info.get_stock_code_summary_info(True)
         collect_summary_data = False
