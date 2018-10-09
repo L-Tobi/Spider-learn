@@ -9,6 +9,7 @@ import sys
 import re
 import time
 import threading
+from smtp import mail
 from datetime import datetime
 from time import sleep
 from test import proxy_test
@@ -22,7 +23,7 @@ pm_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '13:00:00'
 pm_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '15:01:00'
 am_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '09:30:00'
 am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:31:00'
-
+'''
 collect_summary_data = True
 #try:
 # get_stock_info.get_stock_code_basis_info(True)
@@ -52,7 +53,7 @@ while(True):
     if (current_time > pm_end_time and collect_summary_data):
         get_stock_info.get_stock_code_summary_info(True)
         collect_summary_data = False
-
+'''
     #get_stock_info.get_valid_stock_code('60')
 #except:
  #   print('something is wrong')

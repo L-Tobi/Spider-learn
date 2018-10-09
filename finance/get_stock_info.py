@@ -132,7 +132,7 @@ def get_stock_codes_info(current_time):
                 #        code_item_result.group(10),code_item_result.group(13),code_item_result.group(14))
 
             sleep(2)
-        if (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) > time.strftime("%Y-%m-%d ", time.localtime()) + '15:02:20'):
+        if (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) > time.strftime("%Y-%m-%d ", time.localtime()) + '11:29:20'):
             #create table as year
             #insert data and end of functions
             #if database last store time < now current collect data
@@ -140,10 +140,8 @@ def get_stock_codes_info(current_time):
                 #create table here
                 table_name = keys + '_realtime_' +  time.strftime("%Y", time.localtime())
                 operation.create_table(table_name ,'realtime')
-                print(keys)
                 for item in values:
-                    print('insert data ' , item)
-                    if(str(item[4]) > str(item[4])[:-5] + '15:03:00'):
+                    if(str(item[4]) > str(item[4])[:-5] + '15:03'):
                         print ('data error ! forbid to insert')
                         break
                     # operation.insert_table(table_name,'realtime',item)
@@ -151,7 +149,7 @@ def get_stock_codes_info(current_time):
             for key, value in all_code_today_info.items():
                 if(float(value[0]) != 0):
                     # here update high and low data into summary table
-                    print('TMP ', key, value)
+                    print('insert high and low data ', key, value, type(key), type(value))
             break
         sleep(6)
         print(all_code_real_price)
