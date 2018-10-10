@@ -1,4 +1,5 @@
 import pymysql
+from smtp import mail
 
 try:
     db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
@@ -22,8 +23,8 @@ def create_table(name,type):
     # cursor = db.cursor()
     if(type == 'summary'):
         try:
-            sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (open float, yesterday float, close float, high float, low float, buy float, sale float, volumn double, money double, turnover float, time date)'
-            # sql = 'ALTER TABLE ' + name + ' ADD time date'
+            sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (open float, yesterday float, close float, high float, low float, buy float, sale float, volumn double, money double, turnover float, hightime datetime, lowtime datetime, time date)'
+            #sql = 'ALTER TABLE ' + name + ' ADD COLUMN lowtime datetime AFTER hightime' #lowtime datetime
             cursor.execute(sql)
         except Exception as e:
             print (str(e))
@@ -53,15 +54,15 @@ def insert_table(name,type,data):
     # db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
     # cursor = db.cursor()
     if (type == 'summary'):
-        sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, hightime, lowtime, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
         print (sql)
         try:
             print (data)
             cursor.execute(sql, data)
             db.commit()
         except Exception  as e:
+            print ('insert summary data error!' + str(e) + name)
             db.rollback()
-            print ('insert summary data error!' + str(e))
         # db.close()
     elif(type == 'basis'):
         #需要市盈率信息
@@ -70,8 +71,8 @@ def insert_table(name,type,data):
             cursor.execute(sql, data)
             db.commit()
         except Exception as e:
+            print ('insert basis data error!' + str(e) + name)
             db.rollback()
-            print ('insert basis data error!' + str(e))
         # db.close()
     elif (type == 'realtime'):
         sql = 'INSERT INTO ' + name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
@@ -79,8 +80,9 @@ def insert_table(name,type,data):
             cursor.execute(sql, data)
             db.commit()
         except Exception as e:
+            print ('insert realtime data error!' + str(e) + name)
+            mail.send_mail('insert realtime data error!' + str(e) + name)
             db.rollback()
-            print ('insert realtime data error!' + str(e))
     elif (type == 'exchange_rate'):
         sql = 'INSERT INTO ' + name + '(united_arab_emirates, australian, brazil, canada, switzerland, denmark, europe, english, hongkong, indonesia, india, japan, south_korea, pataca, norway, new_zealand, philippines, russia, saudi_arabia, sweden, singapore, thailand, turkey, taiwan, american, south_africa, time)' \
                                       ' values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -88,8 +90,8 @@ def insert_table(name,type,data):
             cursor.execute(sql, data)
             db.commit()
         except Exception as e:
+            print ('insert exchange_rate data error! ' + str(e) + name)
             db.rollback()
-            print ('insert exchange_rate data error! ' + str(e))
 
 
 def delete_table(name):
