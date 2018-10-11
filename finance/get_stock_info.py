@@ -58,7 +58,7 @@ def get_stock_codes_info(current_time):
             all_code_real_price[code_info[2:]] = []
             all_code_real_price_temp[code_info[2:]] = [0,0,0,0,current_time]
             all_code_compare_time[code_info[2:]] = [True, current_time]
-
+    print ('start record realtime!')
     while(True):
         for code_list_item in all_code_list:
             try:

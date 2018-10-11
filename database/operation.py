@@ -145,7 +145,7 @@ def find_stock_basis_info(code_id,type,item='*',content=''):
                 else:
                     return row[0]
         except Exception as e:
-            print('find basic data error , will return 1 ', str(e))
+            print('find basic data error , will return 1 ', str(e), code_id)
             return 1
 
     return None

@@ -39,12 +39,12 @@ thread_realtime = threading.Thread(target=get_realtime_stock_info)
 thread_realtime.start()
 
 
-while(True):
-    current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
-
-    if ((datetime.now() - exchange_rate_time).seconds > 300):
-        get_exchange_rate_info.get_exchange_rate()
-        exchange_rate_time = datetime.now()
+# while(True):
+#     current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+#
+#     if ((datetime.now() - exchange_rate_time).seconds > 300):
+#         get_exchange_rate_info.get_exchange_rate()
+#         exchange_rate_time = datetime.now()
 
     #get_stock_info.get_valid_stock_code('60')
 #except:
