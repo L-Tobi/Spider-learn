@@ -1,4 +1,5 @@
 import pymysql
+import time
 from smtp import mail
 
 try:
@@ -6,6 +7,21 @@ try:
     cursor = db.cursor()
 except Exception as e:
     print(' connect database error! ', str(e))
+
+def connect_database():
+    try:
+        db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
+        cursor = db.cursor()
+        return db,cursor
+    except Exception as e:
+        print(' connect database error! ', str(e))
+
+def disconnect_database(db):
+    try:
+        db.close()
+    except Exception as e:
+        print(' disconnect database error! ', str(e))
+
 
 def create_database(name):
     # db = pymysql.connect(host='localhost',user='root',password='123456',port=3306)

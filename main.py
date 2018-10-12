@@ -1,10 +1,6 @@
 from urllib.request import ProxyHandler , build_opener
-from test import urllib_test
-from test import requests_test
-from test import regex_test
 from finance import get_stock_info
 from finance import get_exchange_rate_info
-from  test import lxml_test
 import sys
 import re
 import time
@@ -13,7 +9,7 @@ from smtp import mail
 from datetime import datetime
 from time import sleep
 from test import proxy_test
-from database import operation
+from database import mysql
 
 #urllib_test.check_robot_txt('https://www.sina.com.cn')
 
@@ -33,7 +29,7 @@ def get_realtime_stock_info():
         current_time = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
         if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
             get_stock_info.get_stock_codes_info(current_time)
-        sleep(10000)
+        sleep(50)
 
 thread_realtime = threading.Thread(target=get_realtime_stock_info)
 thread_realtime.start()

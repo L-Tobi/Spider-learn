@@ -3,7 +3,7 @@ import re
 import time
 import csv
 from time import sleep
-from database import operation
+from database import mysql
 from smtp import mail
 #待修改地方
 #数据插入数据库 实时更新数据以及最高最低值数据
@@ -53,7 +53,7 @@ def get_stock_codes_info(current_time):
     with open('sz_code_list.txt', 'r') as file_code_list:
         for code_info in file_code_list:
             code_info = re.sub('\n', '', code_info)
-            all_code_currcapital[code_info[2:]] = operation.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
+            all_code_currcapital[code_info[2:]] = mysql.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
             all_code_today_info[code_info[2:]] = [0,'1991-06-18 00:00',100000,'1991-06-18 00:00']
             all_code_real_price[code_info[2:]] = []
             all_code_real_price_temp[code_info[2:]] = [0,0,0,0,current_time]
@@ -128,12 +128,12 @@ def get_stock_codes_info(current_time):
             for keys,values in all_code_real_price.items():
                 #create table here
                 table_name = keys + '_realtime_' +  time.strftime("%Y", time.localtime())
-                operation.create_table(table_name ,'realtime')
+                mysql.create_table(table_name ,'realtime')
                 for item in values:
                     if(str(item[4]) > str(item[4])[:-5] + '15:03'):
                         print ('data error ! forbid to insert')
                         break
-                    operation.insert_table(table_name,'realtime',item)
+                    mysql.insert_table(table_name,'realtime',item)
 
             # for key, value in all_code_today_info.items():
             #     if(float(value[0]) != 0):
@@ -147,7 +147,7 @@ def get_stock_codes_info(current_time):
         print(all_code_real_price['002202'])
 
 def get_stock_code_basis_info(is_store_data=False):
-    operation.create_table('stock_basis_info','basis')
+    mysql.create_table('stock_basis_info','basis')
     for code_list_item in all_code_basis_list:
         current_code_basis_info = requests.get(code_list_item)
         # print (current_code_basis_info.text)
@@ -165,8 +165,8 @@ def get_stock_code_basis_info(is_store_data=False):
                                code_item_result.group(5), code_item_result.group(7), code_item_result.group(8),
                                code_item_result.group(12), code_item_result.group(13),code_item_result.group(14))
                 print (insert_data)
-                operation.insert_table('stock_basis_info', 'basis', insert_data)
-                # operation.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
+                mysql.insert_table('stock_basis_info', 'basis', insert_data)
+                # mysql.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
             else:
                 print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
                    code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
@@ -191,7 +191,7 @@ def get_stock_code_summary_info(is_store_data=False, high_and_low_time_data={}):
 
                 current_code_id = code_item_result.group(1)
                 #open,yesterday,close,high,low,buy,sale,volumn,money
-                currcapital = operation.find_stock_basis_info(current_code_id,'basis',item='currcapital',content='code_id = ' + current_code_id)
+                currcapital = mysql.find_stock_basis_info(current_code_id,'basis',item='currcapital',content='code_id = ' + current_code_id)
 
                 volumn = float(code_item_result.group(9))
                 if (currcapital == 0):
@@ -212,10 +212,10 @@ def get_stock_code_summary_info(is_store_data=False, high_and_low_time_data={}):
                                   code_item_result.group(8), code_item_result.group(9), code_item_result.group(10),
                                   '{0:.5f}'.format(float(turnover)), high_time, low_time, code_item_result.group(13))
                 # print(insert_data)
-                # operation.create_table(current_code_id + '_summary', 'summary')
-                database_date = operation.find_stock_basis_info(current_code_id,'summary',item='time',content= 'time = ' + re.sub('-','',code_item_result.group(13)))
+                # mysql.create_table(current_code_id + '_summary', 'summary')
+                database_date = mysql.find_stock_basis_info(current_code_id,'summary',item='time',content= 'time = ' + re.sub('-','',code_item_result.group(13)))
                 if (database_date == None):
-                    operation.insert_table(current_code_id + '_summary', 'summary', insert_data)
+                    mysql.insert_table(current_code_id + '_summary', 'summary', insert_data)
                     print ('insert data high low!!!')
                 else:
                    print ('data has exists, cannot insert repeatly! high low')
