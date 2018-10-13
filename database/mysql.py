@@ -2,11 +2,11 @@ import pymysql
 import time
 from smtp import mail
 
-try:
-    db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-    cursor = db.cursor()
-except Exception as e:
-    print(' connect database error! ', str(e))
+# try:
+#     db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
+#     cursor = db.cursor()
+# except Exception as e:
+#     print(' connect database error! ', str(e))
 
 def connect_database():
     try:
@@ -23,20 +23,15 @@ def disconnect_database(db):
         print(' disconnect database error! ', str(e))
 
 
-def create_database(name):
-    # db = pymysql.connect(host='localhost',user='root',password='123456',port=3306)
-    # cursor = db.cursor()
+def create_database(cursor,name):
     cursor.execute('SELECT VERSION()')
     data = cursor.fetchone()
     print ('database version :',data)
     add_data_base = "CREATE DATABASE IF NOT EXISTS " + name + " DEFAULT CHARACTER SET UTF8MB4"
     cursor.execute(add_data_base)
-    # db.close()
 
 
-def create_table(name,type):
-    # db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-    # cursor = db.cursor()
+def create_table(cursor,name,type):
     if(type == 'summary'):
         try:
             sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (open float, yesterday float, close float, high float, low float, buy float, sale float, volumn double, money double, turnover float, hightime datetime, lowtime datetime, time date)'
@@ -63,15 +58,11 @@ def create_table(name,type):
             cursor.execute(sql)
         except Exception as e:
             print (str(e))
-    # db.close()
 
 
-def insert_table(name,type,data):
-    # db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-    # cursor = db.cursor()
+def insert_table(db,cursor,name,type,data):
     if (type == 'summary'):
         sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, hightime, lowtime, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-        print (sql)
         try:
             print (data)
             cursor.execute(sql, data)
@@ -79,7 +70,6 @@ def insert_table(name,type,data):
         except Exception  as e:
             print ('insert summary data error!' + str(e) + name)
             db.rollback()
-        # db.close()
     elif(type == 'basis'):
         #需要市盈率信息
         sql = 'INSERT INTO stock_basis_info (code_id, lastyear_mgsy, fourQ_mgsy, mgjzc, totalcapital, currcapital, profit, profit_four, issue_price ) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
@@ -89,7 +79,6 @@ def insert_table(name,type,data):
         except Exception as e:
             print ('insert basis data error!' + str(e) + name)
             db.rollback()
-        # db.close()
     elif (type == 'realtime'):
         sql = 'INSERT INTO ' + name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
         try:
@@ -110,7 +99,7 @@ def insert_table(name,type,data):
             db.rollback()
 
 
-def delete_table(name):
+def delete_table(db,cursor,name):
     try:
         sql = 'DROP TABLE ' + name
         cursor.execute(sql)
@@ -119,7 +108,7 @@ def delete_table(name):
         print ('delete error!', str(e))
 
 
-def update_stock_basis_info(data):
+def update_stock_basis_info(db,cursor,data):
     sql = 'UPDATE stock_basis_info SET totalcapital = %s, currcapital = %s WHERE code_id = %s'
     try:
         cursor.execute(sql, data)
@@ -130,7 +119,7 @@ def update_stock_basis_info(data):
 
 
 
-def find_stock_basis_info(code_id,type,item='*',content=''):
+def find_stock_basis_info(cursor,code_id,type,item='*',content=''):
     if (type == 'summary'):
         sql = 'SELECT ' + item + ' FROM ' + code_id + '_summary' + ' WHERE ' + content
         cursor.execute(sql)
@@ -166,7 +155,7 @@ def find_stock_basis_info(code_id,type,item='*',content=''):
 
     return None
 
-def find_exchange_rate_info(item='*', content=''):
+def find_exchange_rate_info(cursor,item='*', content=''):
     sql = 'SELECT ' + item + ' FROM exchange_rate_recorder_info ' + content
     cursor.execute(sql)
     row = cursor.fetchone()

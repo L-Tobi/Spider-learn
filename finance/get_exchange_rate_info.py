@@ -29,9 +29,9 @@ def get_exchange_rate():
                 print (str(e), i)
 
     insert_data = tuple(data)
-    recorder_time = mysql.find_exchange_rate_info(item='max(time)',content='')
+    recorder_time = mysql.find_exchange_rate_info(database_cursor, item='max(time)',content='')
     if(str(recorder_time) < last_record_exchange_rate_time):
-        mysql.insert_table('exchange_rate_recorder_info', 'exchange_rate', insert_data)
+        mysql.insert_table(database, database_cursor, 'exchange_rate_recorder_info', 'exchange_rate', insert_data)
         print ('insert exchange_rate ' ,recorder_time, last_record_exchange_rate_time)
 
 

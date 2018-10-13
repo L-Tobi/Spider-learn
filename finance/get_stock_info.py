@@ -6,16 +6,18 @@ from time import sleep
 from database import mysql
 from smtp import mail
 #待修改地方
-#数据插入数据库 实时更新数据以及最高最低值数据
 #防止网络意外退出功能, 将数据优先写入本地磁盘
-#插入完数据立马清空数据缓存
 #修改创建表的地方，避免每天都检测是否创建一次
+#进一步优化实时存储数据
 code_index = 0
 code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 all_code_list = []
 all_code_basis_list = []
 all_code_today_info = {}
+
+database,database_cursor = mysql.connect_database()
+
 with open('sz_code_list.txt','r') as file_code_list:
     for code_info in file_code_list:
         if(not code_info):
@@ -53,7 +55,7 @@ def get_stock_codes_info(current_time):
     with open('sz_code_list.txt', 'r') as file_code_list:
         for code_info in file_code_list:
             code_info = re.sub('\n', '', code_info)
-            all_code_currcapital[code_info[2:]] = mysql.find_stock_basis_info(code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
+            all_code_currcapital[code_info[2:]] = mysql.find_stock_basis_info(database_cursor,code_info[2:], 'basis', item='currcapital', content='code_id = ' + code_info[2:])
             all_code_today_info[code_info[2:]] = [0,'1991-06-18 00:00',100000,'1991-06-18 00:00']
             all_code_real_price[code_info[2:]] = []
             all_code_real_price_temp[code_info[2:]] = [0,0,0,0,current_time]
@@ -128,26 +130,27 @@ def get_stock_codes_info(current_time):
             for keys,values in all_code_real_price.items():
                 #create table here
                 table_name = keys + '_realtime_' +  time.strftime("%Y", time.localtime())
-                mysql.create_table(table_name ,'realtime')
+                mysql.create_table(database_cursor, table_name, 'realtime')
                 for item in values:
                     if(str(item[4]) > str(item[4])[:-5] + '15:03'):
                         print ('data error ! forbid to insert')
                         break
-                    mysql.insert_table(table_name,'realtime',item)
+                    mysql.insert_table(database, database_cursor,table_name,'realtime',item)
 
             # for key, value in all_code_today_info.items():
             #     if(float(value[0]) != 0):
             #         # here update high and low data into summary table
             #         print('insert high and low data ', key, value, type(key), type(value))
 
-            get_stock_code_summary_info(True)
+            get_stock_code_summary_info(True, all_code_today_info)
             all_code_today_info.clear()
+            print ('insert realtime end ' +  time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
             break
         sleep(6)
         print(all_code_real_price['002202'])
 
 def get_stock_code_basis_info(is_store_data=False):
-    mysql.create_table('stock_basis_info','basis')
+    mysql.create_table(database_cursor, 'stock_basis_info', 'basis')
     for code_list_item in all_code_basis_list:
         current_code_basis_info = requests.get(code_list_item)
         # print (current_code_basis_info.text)
@@ -165,7 +168,7 @@ def get_stock_code_basis_info(is_store_data=False):
                                code_item_result.group(5), code_item_result.group(7), code_item_result.group(8),
                                code_item_result.group(12), code_item_result.group(13),code_item_result.group(14))
                 print (insert_data)
-                mysql.insert_table('stock_basis_info', 'basis', insert_data)
+                mysql.insert_table(database, database_cursor, 'stock_basis_info', 'basis', insert_data)
                 # mysql.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
             else:
                 print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
@@ -191,7 +194,7 @@ def get_stock_code_summary_info(is_store_data=False, high_and_low_time_data={}):
 
                 current_code_id = code_item_result.group(1)
                 #open,yesterday,close,high,low,buy,sale,volumn,money
-                currcapital = mysql.find_stock_basis_info(current_code_id,'basis',item='currcapital',content='code_id = ' + current_code_id)
+                currcapital = mysql.find_stock_basis_info( database_cursor,current_code_id,'basis',item='currcapital',content='code_id = ' + current_code_id)
 
                 volumn = float(code_item_result.group(9))
                 if (currcapital == 0):
