@@ -12,10 +12,10 @@ from test import proxy_test
 from database import mysql
 from tool import debug
 
-pm_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '13:00:00'
-pm_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '15:01:00'
-am_start_time = time.strftime("%Y-%m-%d ", time.localtime()) + '09:25:00'
-am_end_time = time.strftime("%Y-%m-%d ", time.localtime()) + '11:31:00'
+pm_start_time = debug.current_time('day') + '13:00:00'
+pm_end_time = debug.current_time('day') + '15:01:00'
+am_start_time = debug.current_time('day') + '09:25:00'
+am_end_time = debug.current_time('day') + '11:31:00'
 
 collect_summary_data = True
 #try:
@@ -24,7 +24,7 @@ collect_summary_data = True
 exchange_rate_time = datetime.now()
 
 def get_realtime_stock_info():
-    china_stock = stock.china()
+    china_stock = stock.China()
     china_stock.get_stock_codes_info(current_time= debug.current_time())
 
     # while(True):

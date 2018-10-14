@@ -31,7 +31,15 @@ def log_warning(message):
 #
 #     b = 3
 #     print ('start1111111')
-#     sleep(5)
+#     # sleep(5)
+#
+#     @staticmethod
+#     def jj():
+#         self.h = 10
+#
+#     def lll(self):
+#         print (self.h)
+#
 #     print ('start')
 #     def __init__(self):
 #         self.cc = 1
@@ -45,9 +53,12 @@ def log_warning(message):
 #         print ('finally', self.b, a.b)
 #     def hh(self):
 #         self.b = 6
-#
-#
+
+
 # g = a()
-# print ('cccc')
+# print ('cccc ' + g.__class__.__name__)
 # h = a()
 # j = a()
+# # j.lll()
+# a.jj()
+# j.lll()

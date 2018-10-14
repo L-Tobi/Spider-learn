@@ -10,17 +10,17 @@ from tool import debug
 #防止网络意外退出功能, 将数据优先写入本地磁盘
 #修改创建表的地方，避免每天都检测是否创建一次
 #进一步优化实时存储数据
+#每天更新股票数量
 
 
 
-
-class stock:
+class Stock:
     'base class of stock'
     def __init__(self):
         pass
 
 
-class china(stock):
+class China(Stock):
     'china stock'
 
     all_code_list = []
@@ -52,8 +52,12 @@ class china(stock):
 
 
     def __init__(self):
-        self.database, self.database_cursor = mysql.connect_database()
+        self.database = mysql.China()
         self.all_code_today_info = {}
+
+    def __del__(self):
+        self.all_code_today_info = {}
+
 
     def get_stock_codes_info(self, current_time):
         time_change = True
@@ -67,7 +71,7 @@ class china(stock):
         with open('sz_code_list.txt', 'r') as file_code_list:
             for code_info in file_code_list:
                 code_info = re.sub('\n', '', code_info)
-                all_code_currcapital[code_info[2:]] = mysql.find_stock_basis_info(self.database_cursor, code_info[2:],
+                all_code_currcapital[code_info[2:]] = self.database.find_stock_basis_info( code_info[2:],
                                                                                   'basis', item='currcapital',
                                                                                   content='code_id = ' + code_info[2:])
                 self.all_code_today_info[code_info[2:]] = [0, '1991-06-18 00:00', 100000, '1991-06-18 00:00']
@@ -76,7 +80,7 @@ class china(stock):
                 all_code_compare_time[code_info[2:]] = [True, current_time]
         debug.log_info('start record realtime!')
         while (True):
-            for code_list_item in china.all_code_list:
+            for code_list_item in China.all_code_list:
                 try:
                     current_code_info = requests.get(code_list_item)
                     code_results = current_code_info.text.split(';')
@@ -144,19 +148,19 @@ class china(stock):
             if (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) > time.strftime("%Y-%m-%d ",
                                                                                      time.localtime()) + '15:02:20'):
                 debug.log_info('start record code summary info')
-                get_stock_code_summary_info(True, self.all_code_today_info)
+                self.get_stock_code_summary_info(True, self.all_code_today_info)
                 self.all_code_today_info.clear()
                 debug.log_info('finish record code summary info')
                 # if database last store time < now current collect data
                 for keys, values in all_code_real_price.items():
                     # create table here
                     table_name = keys + '_realtime_' + time.strftime("%Y", time.localtime())
-                    mysql.create_table(self.database_cursor, table_name, 'realtime')
+                    # self.database.create_table(table_name, 'realtime')
                     for item in values:
                         if (str(item[4]) > str(item[4])[:-5] + '15:03'):
                             print ('data error ! forbid to insert')
                             break
-                        mysql.insert_table(self.database, self.database_cursor, table_name, 'realtime', item)
+                            self.database.insert_table(table_name, 'realtime', item)
 
                 # for key, value in self.all_code_today_info.items():
                 #     if(float(value[0]) != 0):
@@ -169,8 +173,8 @@ class china(stock):
             print(all_code_real_price['002202'])
 
     def get_stock_code_basis_info(self, is_store_data=False):
-        mysql.create_table(self.database_cursor, 'stock_basis_info', 'basis')
-        for code_list_item in china.all_code_basis_list:
+        self.database.create_table(self.database_cursor, 'stock_basis_info', 'basis')
+        for code_list_item in China.all_code_basis_list:
             current_code_basis_info = requests.get(code_list_item)
             # print (current_code_basis_info.text)
             code_basis_results = current_code_basis_info.text.split(';')
@@ -187,8 +191,8 @@ class china(stock):
                                    code_item_result.group(5), code_item_result.group(7), code_item_result.group(8),
                                    code_item_result.group(12), code_item_result.group(13), code_item_result.group(14))
                     print (insert_data)
-                    mysql.insert_table(self.database, self.database_cursor, 'stock_basis_info', 'basis', insert_data)
-                    # mysql.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
+                    self.database.insert_table('stock_basis_info', 'basis', insert_data)
+                    # self.database.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
                 else:
                     print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
                            code_item_result.group(4), code_item_result.group(5), code_item_result.group(6),
@@ -198,7 +202,7 @@ class china(stock):
             sleep(2)
 
     def get_stock_code_summary_info(self, is_store_data=False, high_and_low_time_data={}):
-        for code_list_item in china.all_code_list:
+        for code_list_item in China.all_code_list:
             current_code_info = requests.get(code_list_item)
             code_results = current_code_info.text.split(';')
             for code_item in code_results:
@@ -213,7 +217,7 @@ class china(stock):
 
                     current_code_id = code_item_result.group(1)
                     # open,yesterday,close,high,low,buy,sale,volumn,money
-                    currcapital = mysql.find_stock_basis_info(self.database_cursor, current_code_id, 'basis',
+                    currcapital = self.database.find_stock_basis_info(current_code_id, 'basis',
                                                               item='currcapital',
                                                               content='code_id = ' + current_code_id)
 
@@ -236,12 +240,12 @@ class china(stock):
                                    code_item_result.group(8), code_item_result.group(9), code_item_result.group(10),
                                    '{0:.5f}'.format(float(turnover)), high_time, low_time, code_item_result.group(13))
                     # print(insert_data)
-                    # mysql.create_table(current_code_id + '_summary', 'summary')
-                    database_date = mysql.find_stock_basis_info(current_code_id, 'summary', item='time',
+                    # self.database.create_table(current_code_id + '_summary', 'summary')
+                    database_date = self.database.find_stock_basis_info(current_code_id, 'summary', item='time',
                                                                 content='time = ' + re.sub('-', '',
                                                                                            code_item_result.group(13)))
                     if (database_date == None):
-                        mysql.insert_table(current_code_id + '_summary', 'summary', insert_data)
+                        self.database.insert_table(current_code_id + '_summary', 'summary', insert_data)
                         print ('insert data high low!!!')
                     else:
                         print ('data has exists, cannot insert repeatly! high low')
@@ -328,12 +332,13 @@ class china(stock):
 
 
 
-class america(stock):
+class America(Stock):
     'america stock'
     def __init__(self):
         pass
 
-
+    def get_stock_code_summary_info(self, is_store_data=False, high_and_low_time_data={}):
+        pass
 
 
 
