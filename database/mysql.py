@@ -3,11 +3,7 @@ import time
 from smtp import mail
 from tool import debug
 
-# try:
-#     db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
-#     cursor = db.cursor()
-# except Exception as e:
-#     print(' connect database error! ', str(e))
+
 
 class Database:
     def __init__(self):
@@ -164,15 +160,44 @@ class America(Stock):
     def __del__(self):
         self.disconnect_database()
 
+    def create_table(self, name):
+        try:
+            sql = 'CREATE TABLE IF NOT EXISTS ' + name + ' (d_open double, d_yesterday double, d_close double, d_high double, d_low double, d_volumn bigint, d_money bigint, ' \
+                                                         'n_open double, n_yesterday double, n_close double, n_high double, n_low double, n_volumn bigint, n_money bigint, time date)'
+            self.cursor.execute(sql)
+        except Exception as e:
+            debug.log_error('create america table error ' + str(e))
 
 
+    def insert_table(self, name, data):
+        sql = 'INSERT INTO ' + name + '(d_open, d_yesterday, d_close, d_high, d_low, d_volumn, d_money, n_open, n_yesterday, n_close, n_high, n_low, n_volumn, n_money, time) ' \
+                                      'values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        try:
+            self.cursor.execute(sql, data)
+            self.db.commit()
+        except Exception as e:
+            debug.log_error ('insert exchange_rate data error! ' + str(e) + name)
+            self.db.rollback()
+
+    def find_summary_info(self, item='*', content=''):
+        sql = 'SELECT ' + item + ' FROM America_summary ' + content
+        self.cursor.execute(sql)
+        row = self.cursor.fetchone()
+        while row is not None:
+            if (item == '*'):
+                return row
+            else:
+                return row[0]
 
 class ExchangRate(Database):
 
     # Database.connect_database()
 
     def __init__(self):
-        pass
+        self.connect_database()
+
+    def __del__(self):
+        self.disconnect_database()
 
     def create_table(self, name):
         try:

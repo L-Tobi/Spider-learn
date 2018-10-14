@@ -1,6 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from database import  mysql
+
+
 current_exchange_rate = 5
 current_exchange_rate_date = 6
 current_exchange_rate_seconds = 7
@@ -9,6 +11,7 @@ last_record_exchange_rate_time = '1990-01-01 00:00:00'
 
 database = mysql.ExchangRate()
 # mysql.create_table('exchange_rate_recorder_info' ,'exchange_rate')
+
 
 def get_exchange_rate():
     url = 'http://www.boc.cn/sourcedb/whpj/'
@@ -30,7 +33,7 @@ def get_exchange_rate():
     insert_data = tuple(data)
     recorder_time = database.find_realtime_info(item='max(time)',content='')
     if(str(recorder_time) < last_record_exchange_rate_time):
-        database.insert_table('exchange_rate_recorder_info', 'exchange_rate', insert_data)
+        database.insert_table('exchange_rate_recorder_info', insert_data)
         print ('insert exchange_rate ' ,recorder_time, last_record_exchange_rate_time)
 
 

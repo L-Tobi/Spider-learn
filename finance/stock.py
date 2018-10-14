@@ -11,7 +11,7 @@ from tool import debug
 #修改创建表的地方，避免每天都检测是否创建一次
 #进一步优化实时存储数据
 #每天更新股票数量
-
+#将异常语句弄成修饰符
 
 
 class Stock:
@@ -335,15 +335,20 @@ class China(Stock):
 class America(Stock):
     'america stock'
     def __init__(self):
-        pass
-
-    def get_stock_code_summary_info(self, is_store_data=False, high_and_low_time_data={}):
-        pass
+        pass# self.database = mysql.America()
 
 
 
+    def get_stock_code_summary_info(self):
+        url = 'https://hq.sinajs.cn/etag.php?_=1539527704978&list=gb_$dji,gb_ixic'
+        result = requests.get(url)
+        print (result.text)
 
 
+
+
+test = America()
+test.get_stock_code_summary_info()
 
 
 
