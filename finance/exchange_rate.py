@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 from database import  mysql
-
+from tool import debug
 
 current_exchange_rate = 5
 current_exchange_rate_date = 6
@@ -34,6 +34,6 @@ def get_exchange_rate():
     recorder_time = database.find_realtime_info(item='max(time)',content='')
     if(str(recorder_time) < last_record_exchange_rate_time):
         database.insert_table('exchange_rate_recorder_info', insert_data)
-        print ('insert exchange_rate ' ,recorder_time, last_record_exchange_rate_time)
+        debug.log_info ('insert exchange_rate ' + str(recorder_time) + str(last_record_exchange_rate_time))
 
 

@@ -12,6 +12,8 @@ class America():
     volumn = 6
     money = 7
     yesterday = 8
+
+
     def __init__(self):
         self.database = mysql.America()
 
@@ -41,6 +43,8 @@ class America():
         a = self.database.find_summary_info(item='time',content='time = ' + recorder_time)
 
         print(a)
+
+
 
 
 # test = America()
