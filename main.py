@@ -24,15 +24,13 @@ collect_summary_data = True
 exchange_rate_time = datetime.now()
 
 def get_realtime_stock_info():
-    china_stock = stock.China()
-    china_stock.get_stock_codes_info(current_time= debug.current_time())
-
-    # while(True):
-    #     current_time = debug.current_time()
-    #     if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
-    #         stock.china.get_stock_codes_info(current_time)
-    #     break
-    #     sleep(50)
+    while(True):
+        current_time = debug.current_time()
+        if (current_time > am_start_time and current_time < am_end_time) or (current_time > pm_start_time and current_time < pm_end_time):
+            china_stock = stock.China()
+            china_stock.get_stock_codes_info(current_time=debug.current_time())
+            break
+        sleep(50)
 
 thread_realtime = threading.Thread(target=get_realtime_stock_info)
 thread_realtime.start()

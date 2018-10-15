@@ -346,9 +346,9 @@ class America(Stock):
 
 
 
-
-test = America()
-test.get_stock_code_summary_info()
+#
+# test = America()
+# test.get_stock_code_summary_info()
 
 
 
