@@ -111,7 +111,7 @@ class China(Stock):
         try:
             self.cursor.execute(sql, data)
             self.db.commit()
-        except  e:
+        except Exception as e:
             debug.log_error('update basis info error!' + str(e))
             self.db.rollback()
 
