@@ -49,10 +49,30 @@ class Database:
             self.db.rollback()
             debug.log_error ('delete error!' + str(e))
 
+    def update_column_type(self, tablename='', columnname='', type=''):
+        try:
+            sql = 'alter table ' + tablename + ' modify ' + columnname + ' ' + type
+            self.cursor.execute(sql)
+        except Exception as e:
+            debug.log_error('update stock type error! ' + str(e))
+
+    def update_value(self, tablename='', items='', content=''):
+        try:
+            sql = 'UPDATE ' + tablename + ' SET ' + items + ' ' + content
+            print(sql)
+            self.cursor.execute(sql)
+        except Exception as e:
+            debug.log_error('update stock type error! ' + str(e))
 
 class Stock(Database):
+    tablename_stock_basis_info = 'stock_basis_info'
+
     def __init__(self):
-        pass
+        self.connect_database()
+
+    def __del__(self):
+        self.disconnect_database()
+
 
 
 class China(Stock):
@@ -118,7 +138,7 @@ class China(Stock):
         try:
             self.cursor.execute(sql, data)
             self.db.commit()
-        except  e:
+        except Exception as e:
             debug.log_error('update basis info error!' + str(e))
             self.db.rollback()
 

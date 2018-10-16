@@ -16,7 +16,11 @@ from tool import debug
 
 class Stock:
     'base class of stock'
+
     def __init__(self):
+        pass
+
+    def __del__(self):
         pass
 
 
@@ -33,7 +37,7 @@ class China(Stock):
         for code_info in file_code_list:
             if (not code_info):
                 print ('end')
-            elif (code_index == 700):
+            elif (code_index == 600):
                 code_index = 0
                 current_code = re.sub('\n', '', code_info)
                 code_list = code_list + current_code
@@ -60,6 +64,7 @@ class China(Stock):
 
 
     def get_stock_codes_info(self, current_time):
+        debug.log_info('start code info !')
         time_change = True
         minute_data = []
         today_data = []
@@ -86,7 +91,7 @@ class China(Stock):
                     code_results = current_code_info.text.split(';')
                 except Exception as e:
                     debug.log_error(str(e))
-                    mail.send_mail('get code info error !' + str(e), debug.current_time())
+                    mail.send_mail('get code info error !' + str(e) + debug.current_time())
                     continue
                 for code_item in code_results:
                     if (code_item == '\n'):
@@ -335,15 +340,46 @@ class China(Stock):
 
 class America(Stock):
     'america stock'
+
+    close = 1
+    time = 2
+    open = 3
+    high = 4
+    low = 5
+    volumn = 6
+    money = 7
+    yesterday = 8
+
+
     def __init__(self):
-        pass# self.database = mysql.America()
-
-
+        self.database = mysql.America()
 
     def get_stock_code_summary_info(self):
         url = 'https://hq.sinajs.cn/etag.php?_=1539527704978&list=gb_$dji,gb_ixic'
-        result = requests.get(url, timeout=(6.1,10))
-        print (result.text)
+        result = requests.get(url , timeout=(6.1,10))
+
+        Dji = re.search('dji=".*?,(.*?),.*?,(.*?),.*?,(.*?),(.*?),(.*?),.*?,.*?,(.*?),(.*?),.*,(.*?),.*?";\nvar', result.text, re.S)
+        Nasdaq = re.search('xic=".*?,(.*?),.*?,(.*?),.*?,(.*?),(.*?),(.*?),.*?,.*?,(.*?),(.*?),.*,(.*?),.*?";', result.text, re.S)
+
+        recorder_time = Dji.group(America.time)[:10]
+
+        print(Dji.group(America.close), Dji.group(America.time), Dji.group(America.open), Dji.group(America.high),
+              Dji.group(America.low), Dji.group(America.volumn), Dji.group(America.money), Dji.group(America.yesterday))
+        print(Nasdaq.group(America.close), Nasdaq.group(America.time), Nasdaq.group(America.open),
+              Nasdaq.group(America.high), Nasdaq.group(America.low), Nasdaq.group(America.volumn),
+              Nasdaq.group(America.money), Nasdaq.group(America.yesterday))
+
+        # self.database.create_table('America_summary')
+
+        insert_data = (
+        Dji.group(America.open), Dji.group(America.yesterday), Dji.group(America.close), Dji.group(America.high),
+        Dji.group(America.low), Dji.group(America.volumn), Dji.group(America.money)
+        , Nasdaq.group(America.open), Nasdaq.group(America.yesterday), Nasdaq.group(America.close),
+        Nasdaq.group(America.high), Nasdaq.group(America.low), Nasdaq.group(America.volumn),
+        Nasdaq.group(America.money), recorder_time)
+        self.database.insert_table('America_summary', insert_data)
+        current_record = self.database.find_summary_info(item='time', content='time = ' + recorder_time)
+        print(current_record)
 
 
 
