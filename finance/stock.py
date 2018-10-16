@@ -12,7 +12,7 @@ from tool import debug
 #进一步优化实时存储数据
 #每天更新股票数量
 #将异常语句弄成修饰符
-
+#读取股票代码从txt转向数据库
 
 class Stock:
     'base class of stock'
@@ -82,10 +82,10 @@ class China(Stock):
         while (True):
             for code_list_item in China.all_code_list:
                 try:
-                    current_code_info = requests.get(code_list_item)
+                    current_code_info = requests.get(code_list_item, timeout=(6.1,10))
                     code_results = current_code_info.text.split(';')
                 except Exception as e:
-                    print(str(e))
+                    debug.log_error(str(e))
                     mail.send_mail('get code info error !' + str(e), debug.current_time())
                     continue
                 for code_item in code_results:
@@ -158,16 +158,16 @@ class China(Stock):
                     # self.database.create_table(table_name, 'realtime')
                     for item in values:
                         if (str(item[4]) > str(item[4])[:-5] + '15:03'):
-                            print ('data error ! forbid to insert')
+                            debug.log_warning ('data error ! forbid to insert')
                             break
-                            self.database.insert_table(table_name, 'realtime', item)
+                        self.database.insert_table(table_name, 'realtime', item)
 
                 # for key, value in self.all_code_today_info.items():
                 #     if(float(value[0]) != 0):
                 #         # here update high and low data into summary table
                 #         print('insert high and low data ', key, value, type(key), type(value))
 
-                print ('insert realtime end ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
+                debug.log_info ('insert realtime end ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
                 break
             sleep(6)
             print(all_code_real_price['002202'])
@@ -175,7 +175,7 @@ class China(Stock):
     def get_stock_code_basis_info(self, is_store_data=False):
         self.database.create_table(self.database_cursor, 'stock_basis_info', 'basis')
         for code_list_item in China.all_code_basis_list:
-            current_code_basis_info = requests.get(code_list_item)
+            current_code_basis_info = requests.get(code_list_item, timeout=(6.1,10))
             # print (current_code_basis_info.text)
             code_basis_results = current_code_basis_info.text.split(';')
             for code_item in code_basis_results:
@@ -203,7 +203,7 @@ class China(Stock):
 
     def get_stock_code_summary_info(self, is_store_data=False, high_and_low_time_data={}):
         for code_list_item in China.all_code_list:
-            current_code_info = requests.get(code_list_item)
+            current_code_info = requests.get(code_list_item, timeout=(6.1,10))
             code_results = current_code_info.text.split(';')
             for code_item in code_results:
                 if (code_item == '\n'):
@@ -246,7 +246,8 @@ class China(Stock):
                                                                                            code_item_result.group(13)))
                     if (database_date == None):
                         self.database.insert_table(current_code_id + '_summary', 'summary', insert_data)
-                        print ('insert data high low!!!')
+                        debug.log_info ('insert data high low!!!')
+                        print(insert_data)
                     else:
                         print ('data has exists, cannot insert repeatly! high low')
 
@@ -267,7 +268,7 @@ class China(Stock):
             sz_count = 0
             while _index < 3000:
                 url = 'https://hq.sinajs.cn/?rn=1534081330022&list=' + 'sz00' + str(_index).zfill(4)
-                results = requests.get(url)
+                results = requests.get(url, timeout=(6.1,10))
                 # print (results.text)
                 is_exists = re.search('"(.*)"', results.text, re.S)
 
@@ -289,7 +290,7 @@ class China(Stock):
             sz_count = 0
             while _index < 1000:
                 url = 'https://hq.sinajs.cn/?rn=1534081330022&list=' + 'sz30' + str(_index).zfill(4)
-                results = requests.get(url)
+                results = requests.get(url, timeout=(6.1,10))
                 # print (results.text)
                 is_exists = re.search('"(.*)"', results.text, re.S)
 
@@ -311,7 +312,7 @@ class China(Stock):
             sh_count = 0
             while _index < 3900:
                 url = 'https://hq.sinajs.cn/?rn=1534081330022&list=' + 'sh60' + str(_index).zfill(4)
-                results = requests.get(url)
+                results = requests.get(url, timeout=(6.1,10))
                 # print (results.text)
                 is_exists = re.search('"(.*)"', results.text, re.S)
 
@@ -341,7 +342,7 @@ class America(Stock):
 
     def get_stock_code_summary_info(self):
         url = 'https://hq.sinajs.cn/etag.php?_=1539527704978&list=gb_$dji,gb_ixic'
-        result = requests.get(url)
+        result = requests.get(url, timeout=(6.1,10))
         print (result.text)
 
 

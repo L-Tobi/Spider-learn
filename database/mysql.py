@@ -34,6 +34,13 @@ class Database:
         self.cursor.execute(add_data_base)
 
 
+    def create_table(self, name, items=''):
+        try:
+            sql = 'CREATE TABLE IF NOT EXISTS ' + name + items
+            self.cursor.execute(sql)
+        except Exception as e:
+            debug.log_error('create table error!' + str(e))
+
     def delete_table(self, name):
         try:
             sql = 'DROP TABLE ' + name
@@ -81,7 +88,7 @@ class China(Stock):
         if (type == 'summary'):
             sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, hightime, lowtime, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
             try:
-                debug.log_info (data)
+                debug.log_info (str(data))
                 self.cursor.execute(sql, data)
                 self.db.commit()
             except Exception  as e:
