@@ -33,7 +33,10 @@ class China(Stock):
     code_index = 0
     code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
     code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-    with open('sz_code_list.txt', 'r') as file_code_list:
+
+
+
+    with open('../sz_code_list.txt', 'r') as file_code_list:
         for code_info in file_code_list:
             if (not code_info):
                 print ('end')
@@ -48,6 +51,7 @@ class China(Stock):
                 code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
             else:
                 current_code = re.sub('\n', '', code_info)
+                print(current_code)
                 code_list = code_list + current_code + ','
                 code_basis_list = code_basis_list + current_code + '_i' + ','
                 code_index = code_index + 1
@@ -156,6 +160,8 @@ class China(Stock):
                 self.get_stock_code_summary_info(True, self.all_code_today_info)
                 self.all_code_today_info.clear()
                 debug.log_info('finish record code summary info')
+                usa = America()
+                usa.get_stock_code_summary_info()
                 # if database last store time < now current collect data
                 for keys, values in all_code_real_price.items():
                     # create table here
@@ -176,6 +182,9 @@ class China(Stock):
                 break
             sleep(6)
             print(all_code_real_price['002202'])
+
+    def get_stock_code_id_from_database(self):
+        self.database
 
     def get_stock_code_basis_info(self, is_store_data=False):
         self.database.create_table(self.database_cursor, 'stock_basis_info', 'basis')
@@ -222,7 +231,7 @@ class China(Stock):
 
                     current_code_id = code_item_result.group(1)
                     # open,yesterday,close,high,low,buy,sale,volumn,money
-                    currcapital = self.database.find_stock_basis_info(current_code_id, 'basis',
+                    currcapital = self.database.find_stock_basis_from_database(current_code_id,
                                                               item='currcapital',
                                                               content='code_id = ' + current_code_id)
 
@@ -264,7 +273,6 @@ class China(Stock):
             sleep(2)
 
     def get_valid_stock_code(self, type):
-        # codelist = 'sz002202,sz300098,sz300284'
         # code_list = 'sh000001,s_sh000001'
 
         if (type == '00'):
@@ -377,14 +385,22 @@ class America(Stock):
         , Nasdaq.group(America.open), Nasdaq.group(America.yesterday), Nasdaq.group(America.close),
         Nasdaq.group(America.high), Nasdaq.group(America.low), Nasdaq.group(America.volumn),
         Nasdaq.group(America.money), recorder_time)
-        self.database.insert_table('America_summary', insert_data)
-        current_record = self.database.find_summary_info(item='time', content='time = ' + recorder_time)
-        print(current_record)
+
+        recorder_minute_time = Dji.group(America.time)[11:]
+        print(recorder_minute_time)
+
+        current_record = self.database.find_summary_info(item='max(time)')
+
+        if (str(current_record) < recorder_time and recorder_minute_time > '08:00:00' and recorder_minute_time < '16:00:00'):
+            self.database.insert_table(mysql.America.tablename_stock_america_summary_info, insert_data)
+        else:
+            debug.log_info('data has exists, cannot insert america summary data!')
+
 
 
 
 #
-# test = America()
+test = America()
 # test.get_stock_code_summary_info()
 
 

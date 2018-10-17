@@ -43,7 +43,7 @@ while(True):
     if ((datetime.now() - exchange_rate_time).seconds > 300):
         exchange_rate.get_exchange_rate()
         exchange_rate_time = datetime.now()
-    sleep(1)
+    sleep(10)
     #get_stock_info.get_valid_stock_code('60')
 #except:
  #   print('something is wrong')

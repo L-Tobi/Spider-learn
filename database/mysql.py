@@ -66,6 +66,7 @@ class Database:
 
 class Stock(Database):
     tablename_stock_basis_info = 'stock_basis_info'
+    tablename_stock_america_summary_info = 'America_summary'
 
     def __init__(self):
         self.connect_database()
@@ -92,7 +93,7 @@ class China(Stock):
                 debug.log_error('create table summary error!' + str(e))
         elif (type == 'basis'):  # all stock basic info stores in one table
             try:
-                sql = 'CREATE TABLE IF NOT EXISTS stock_basis_info (code_id int, lastyear_mgsy float, fourQ_mgsy float, mgjzc float, totalcapital double, currcapital double, profit float, profit_four float, issue_price float)'
+                sql = 'CREATE TABLE IF NOT EXISTS ' + Stock.tablename_stock_basis_info + ' (code_id int, lastyear_mgsy float, fourQ_mgsy float, mgjzc float, totalcapital double, currcapital double, profit float, profit_four float, issue_price float)'
                 self.cursor.execute(sql)
             except Exception as e:
                 debug.log_error('create table basis error!' + str(e))
@@ -116,7 +117,7 @@ class China(Stock):
                 self.db.rollback()
         elif (type == 'basis'):
             # 需要市盈率信息
-            sql = 'INSERT INTO stock_basis_info (code_id, lastyear_mgsy, fourQ_mgsy, mgjzc, totalcapital, currcapital, profit, profit_four, issue_price ) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+            sql = 'INSERT INTO ' + Stock.tablename_stock_basis_info + ' (code_id, lastyear_mgsy, fourQ_mgsy, mgjzc, totalcapital, currcapital, profit, profit_four, issue_price ) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
             try:
                 self.cursor.execute(sql, data)
                 self.db.commit()
@@ -134,7 +135,7 @@ class China(Stock):
                 self.db.rollback()
 
     def update_stock_basis_info(self, data):
-        sql = 'UPDATE stock_basis_info SET totalcapital = %s, currcapital = %s WHERE code_id = %s'
+        sql = 'UPDATE ' + Stock.tablename_stock_basis_info + ' SET totalcapital = %s, currcapital = %s WHERE code_id = %s'
         try:
             self.cursor.execute(sql, data)
             self.db.commit()
@@ -143,9 +144,31 @@ class China(Stock):
             self.db.rollback()
 
 
-    def find_stock_basis_info(self, code_id, type, item='*', content=''):
-        if (type == 'summary'):
-            sql = 'SELECT ' + item + ' FROM ' + code_id + '_summary' + ' WHERE ' + content
+    def find_stock_summary_from_database(self, code_id, item='*', content=''):
+        sql = 'SELECT ' + item + ' FROM ' + code_id + '_summary' + ' WHERE ' + content
+        self.cursor.execute(sql)
+        row = self.cursor.fetchone()
+        while row is not None:
+            if (item == '*'):
+                return row
+            else:
+                return row[0]
+
+
+    def find_stock_realtime_from_database(self, code_id, item='*', content=''):
+        table_name = code_id + '_realtime_' + time.strftime("%Y", time.localtime())
+        sql = 'SELECT ' + item + ' FROM ' + table_name + content
+        self.cursor.execute(sql)
+        row = self.cursor.fetchone()
+        while row is not None:
+            if (item == '*'):
+                return row
+            else:
+                return row[0]
+
+    def find_stock_basis_from_database(self, code_id, item='*', content=''):
+        try:
+            sql = 'SELECT '+ item + ' FROM ' + Stock.tablename_stock_basis_info + ' WHERE code_id = ' + code_id
             self.cursor.execute(sql)
             row = self.cursor.fetchone()
             while row is not None:
@@ -153,31 +176,10 @@ class China(Stock):
                     return row
                 else:
                     return row[0]
-        if (type == 'realtime'):
-            table_name = code_id +  '_realtime_' +  time.strftime("%Y", time.localtime())
-            sql = 'SELECT ' + item + ' FROM ' + table_name + content
-            self.cursor.execute(sql)
-            row = self.cursor.fetchone()
-            while row is not None:
-                if (item == '*'):
-                    return row
-                else:
-                    return row[0]
-        if (type == 'basis'):
-            try:
-                sql = 'SELECT '+ item + ' FROM stock_basis_info WHERE code_id = ' + code_id
-                self.cursor.execute(sql)
-                row = self.cursor.fetchone()
-                while row is not None:
-                    if(item=='*'):
-                        return row
-                    else:
-                        return row[0]
-            except Exception as e:
-                debug.log_error ('find basic data error , will return 1 '+ str(e) + code_id)
-                return 1
+        except Exception as e:
+            debug.log_error ('find basic data error , will return 1 '+ str(e) + code_id)
+            return 1
 
-        return None
 
 
 class America(Stock):
@@ -207,7 +209,7 @@ class America(Stock):
             self.db.rollback()
 
     def find_summary_info(self, item='*', content=''):
-        sql = 'SELECT ' + item + ' FROM America_summary ' + content
+        sql = 'SELECT ' + item + ' FROM ' + Stock.tablename_stock_america_summary_info + content
         self.cursor.execute(sql)
         row = self.cursor.fetchone()
         while row is not None:
