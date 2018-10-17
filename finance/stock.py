@@ -34,29 +34,53 @@ class China(Stock):
     code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
     code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 
+    code_all_id = mysql.China().get_column_data_from_database('code_id', mysql.Stock.tablename_stock_basis_info)
 
+#考虑修饰符
+    for item_id in code_all_id:
+        code_id_item = str(item_id[0].zfill(6))
+        if (code_id_item[0] == '0' or code_id_item[0] == '3'):
+            code_id_item = 'sz' + code_id_item
+        else:
+            code_id_item = 'sh' + code_id_item
+        if (code_index == 600):
+            code_index = 0
+            current_code = code_id_item
+            code_list = code_list + current_code
+            code_basis_list = code_basis_list + current_code + '_i'
+            all_code_list.append(code_list)
+            all_code_basis_list.append(code_basis_list)
+            code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+            code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+            print(code_id_item)
+        else:
+            current_code = code_id_item
+            # print(current_code)
+            code_list = code_list + current_code + ','
+            code_basis_list = code_basis_list + current_code + '_i' + ','
+            code_index = code_index + 1
 
-    with open('../sz_code_list.txt', 'r') as file_code_list:
-        for code_info in file_code_list:
-            if (not code_info):
-                print ('end')
-            elif (code_index == 600):
-                code_index = 0
-                current_code = re.sub('\n', '', code_info)
-                code_list = code_list + current_code
-                code_basis_list = code_basis_list + current_code + '_i'
-                all_code_list.append(code_list)
-                all_code_basis_list.append(code_basis_list)
-                code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-                code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-            else:
-                current_code = re.sub('\n', '', code_info)
-                print(current_code)
-                code_list = code_list + current_code + ','
-                code_basis_list = code_basis_list + current_code + '_i' + ','
-                code_index = code_index + 1
-        all_code_list.append(code_list)
-        all_code_basis_list.append(code_basis_list)
+    # with open('../sz_code_list.txt', 'r') as file_code_list:
+    #     for code_info in file_code_list:
+    #         if (not code_info):
+    #             print ('end')
+    #         elif (code_index == 600):
+    #             code_index = 0
+    #             current_code = re.sub('\n', '', code_info)
+    #             code_list = code_list + current_code
+    #             code_basis_list = code_basis_list + current_code + '_i'
+    #             all_code_list.append(code_list)
+    #             all_code_basis_list.append(code_basis_list)
+    #             code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+    #             code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+    #         else:
+    #             current_code = re.sub('\n', '', code_info)
+    #             # print(current_code)
+    #             code_list = code_list + current_code + ','
+    #             code_basis_list = code_basis_list + current_code + '_i' + ','
+    #             code_index = code_index + 1
+    all_code_list.append(code_list)
+    all_code_basis_list.append(code_basis_list)
 
 
     def __init__(self):
@@ -164,7 +188,6 @@ class China(Stock):
                 usa.get_stock_code_summary_info()
                 # if database last store time < now current collect data
                 for keys, values in all_code_real_price.items():
-                    # create table here
                     table_name = keys + '_realtime_' + time.strftime("%Y", time.localtime())
                     # self.database.create_table(table_name, 'realtime')
                     for item in values:

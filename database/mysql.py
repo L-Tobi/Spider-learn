@@ -59,7 +59,7 @@ class Database:
     def update_value(self, tablename='', items='', content=''):
         try:
             sql = 'UPDATE ' + tablename + ' SET ' + items + ' ' + content
-            print(sql)
+            # print(sql)
             self.cursor.execute(sql)
         except Exception as e:
             debug.log_error('update stock type error! ' + str(e))
@@ -103,6 +103,17 @@ class China(Stock):
                 self.cursor.execute(sql)
             except Exception as e:
                 debug.log_error('create table realtime error!' + str(e))
+
+
+    def get_column_data_from_database(self, column_name='', tablename=''):
+        try:
+            sql = 'SELECT ' + column_name + ' FROM ' + tablename;
+            self.cursor.execute(sql)
+            row = self.cursor.fetchall()
+            while row is not None:
+                return row
+        except Exception as e:
+            debug.log_error('get column data from database error ! ' + str(e))
 
 
     def insert_table(self, name, type, data):
