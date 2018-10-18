@@ -75,7 +75,6 @@ class Stock(Database):
         self.disconnect_database()
 
 
-
 class China(Stock):
     def __init__(self):
         self.connect_database()
