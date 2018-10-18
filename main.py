@@ -13,8 +13,8 @@ from database import mysql
 from tool import debug
 
 
-am_start_time = debug.current_time('day') + '09:25:00'
-am_end_time = debug.current_time('day') + '11:31:00'
+am_start_time = debug.current_time('day') + ' 09:25:00'
+am_end_time = debug.current_time('day') + ' 11:31:00'
 
 collect_summary_data = True
 #try:
@@ -27,6 +27,7 @@ def get_realtime_stock_info():
     # china_stock.get_stock_code_summary_info(True)
     while(True):
         current_time = debug.current_time()
+
         if (current_time > am_start_time and current_time < am_end_time):
             china_stock = stock.China()
             china_stock.get_stock_codes_info(current_time=debug.current_time())
@@ -42,7 +43,7 @@ while(True):
     if ((datetime.now() - exchange_rate_time).seconds > 300):
         exchange_rate.get_exchange_rate()
         exchange_rate_time = datetime.now()
-    sleep(1)
+    sleep(10)
     #get_stock_info.get_valid_stock_code('60')
 #except:
  #   print('something is wrong')

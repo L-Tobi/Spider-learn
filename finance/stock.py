@@ -16,7 +16,11 @@ from tool import debug
 
 class Stock:
     'base class of stock'
+
     def __init__(self):
+        pass
+
+    def __del__(self):
         pass
 
 
@@ -29,26 +33,54 @@ class China(Stock):
     code_index = 0
     code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
     code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-    with open('sz_code_list.txt', 'r') as file_code_list:
-        for code_info in file_code_list:
-            if (not code_info):
-                print ('end')
-            elif (code_index == 700):
-                code_index = 0
-                current_code = re.sub('\n', '', code_info)
-                code_list = code_list + current_code
-                code_basis_list = code_basis_list + current_code + '_i'
-                all_code_list.append(code_list)
-                all_code_basis_list.append(code_basis_list)
-                code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-                code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
-            else:
-                current_code = re.sub('\n', '', code_info)
-                code_list = code_list + current_code + ','
-                code_basis_list = code_basis_list + current_code + '_i' + ','
-                code_index = code_index + 1
-        all_code_list.append(code_list)
-        all_code_basis_list.append(code_basis_list)
+
+    code_all_id = mysql.China().get_column_data_from_database('code_id', mysql.Stock.tablename_stock_basis_info)
+
+#考虑修饰符
+    for item_id in code_all_id:
+        code_id_item = str(item_id[0].zfill(6))
+        if (code_id_item[0] == '0' or code_id_item[0] == '3'):
+            code_id_item = 'sz' + code_id_item
+        else:
+            code_id_item = 'sh' + code_id_item
+        if (code_index == 600):
+            code_index = 0
+            current_code = code_id_item
+            code_list = code_list + current_code
+            code_basis_list = code_basis_list + current_code + '_i'
+            all_code_list.append(code_list)
+            all_code_basis_list.append(code_basis_list)
+            code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+            code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+            print(code_id_item)
+        else:
+            current_code = code_id_item
+            # print(current_code)
+            code_list = code_list + current_code + ','
+            code_basis_list = code_basis_list + current_code + '_i' + ','
+            code_index = code_index + 1
+
+    # with open('../sz_code_list.txt', 'r') as file_code_list:
+    #     for code_info in file_code_list:
+    #         if (not code_info):
+    #             print ('end')
+    #         elif (code_index == 600):
+    #             code_index = 0
+    #             current_code = re.sub('\n', '', code_info)
+    #             code_list = code_list + current_code
+    #             code_basis_list = code_basis_list + current_code + '_i'
+    #             all_code_list.append(code_list)
+    #             all_code_basis_list.append(code_basis_list)
+    #             code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+    #             code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
+    #         else:
+    #             current_code = re.sub('\n', '', code_info)
+    #             # print(current_code)
+    #             code_list = code_list + current_code + ','
+    #             code_basis_list = code_basis_list + current_code + '_i' + ','
+    #             code_index = code_index + 1
+    all_code_list.append(code_list)
+    all_code_basis_list.append(code_basis_list)
 
 
     def __init__(self):
@@ -60,6 +92,7 @@ class China(Stock):
 
 
     def get_stock_codes_info(self, current_time):
+        debug.log_info('start code info !')
         time_change = True
         minute_data = []
         today_data = []
@@ -86,7 +119,7 @@ class China(Stock):
                     code_results = current_code_info.text.split(';')
                 except Exception as e:
                     debug.log_error(str(e))
-                    mail.send_mail('get code info error !' + str(e), debug.current_time())
+                    mail.send_mail('get code info error !' + str(e) + debug.current_time())
                     continue
                 for code_item in code_results:
                     if (code_item == '\n'):
@@ -151,9 +184,10 @@ class China(Stock):
                 self.get_stock_code_summary_info(True, self.all_code_today_info)
                 self.all_code_today_info.clear()
                 debug.log_info('finish record code summary info')
+                usa = America()
+                usa.get_stock_code_summary_info()
                 # if database last store time < now current collect data
                 for keys, values in all_code_real_price.items():
-                    # create table here
                     table_name = keys + '_realtime_' + time.strftime("%Y", time.localtime())
                     # self.database.create_table(table_name, 'realtime')
                     for item in values:
@@ -171,6 +205,9 @@ class China(Stock):
                 break
             sleep(6)
             print(all_code_real_price['002202'])
+
+    def get_stock_code_id_from_database(self):
+        self.database
 
     def get_stock_code_basis_info(self, is_store_data=False):
         self.database.create_table(self.database_cursor, 'stock_basis_info', 'basis')
@@ -217,7 +254,7 @@ class China(Stock):
 
                     current_code_id = code_item_result.group(1)
                     # open,yesterday,close,high,low,buy,sale,volumn,money
-                    currcapital = self.database.find_stock_basis_info(current_code_id, 'basis',
+                    currcapital = self.database.find_stock_basis_from_database(current_code_id,
                                                               item='currcapital',
                                                               content='code_id = ' + current_code_id)
 
@@ -259,7 +296,6 @@ class China(Stock):
             sleep(2)
 
     def get_valid_stock_code(self, type):
-        # codelist = 'sz002202,sz300098,sz300284'
         # code_list = 'sh000001,s_sh000001'
 
         if (type == '00'):
@@ -335,20 +371,59 @@ class China(Stock):
 
 class America(Stock):
     'america stock'
+
+    close = 1
+    time = 2
+    open = 3
+    high = 4
+    low = 5
+    volumn = 6
+    money = 7
+    yesterday = 8
+
+
     def __init__(self):
-        pass# self.database = mysql.America()
-
-
+        self.database = mysql.America()
 
     def get_stock_code_summary_info(self):
         url = 'https://hq.sinajs.cn/etag.php?_=1539527704978&list=gb_$dji,gb_ixic'
-        result = requests.get(url, timeout=(6.1,10))
-        print (result.text)
+        result = requests.get(url , timeout=(6.1,10))
+
+        Dji = re.search('dji=".*?,(.*?),.*?,(.*?),.*?,(.*?),(.*?),(.*?),.*?,.*?,(.*?),(.*?),.*,(.*?),.*?";\nvar', result.text, re.S)
+        Nasdaq = re.search('xic=".*?,(.*?),.*?,(.*?),.*?,(.*?),(.*?),(.*?),.*?,.*?,(.*?),(.*?),.*,(.*?),.*?";', result.text, re.S)
+
+        recorder_time = Dji.group(America.time)[:10]
+
+        print(Dji.group(America.close), Dji.group(America.time), Dji.group(America.open), Dji.group(America.high),
+              Dji.group(America.low), Dji.group(America.volumn), Dji.group(America.money), Dji.group(America.yesterday))
+        print(Nasdaq.group(America.close), Nasdaq.group(America.time), Nasdaq.group(America.open),
+              Nasdaq.group(America.high), Nasdaq.group(America.low), Nasdaq.group(America.volumn),
+              Nasdaq.group(America.money), Nasdaq.group(America.yesterday))
+
+        # self.database.create_table('America_summary')
+
+        insert_data = (
+        Dji.group(America.open), Dji.group(America.yesterday), Dji.group(America.close), Dji.group(America.high),
+        Dji.group(America.low), Dji.group(America.volumn), Dji.group(America.money)
+        , Nasdaq.group(America.open), Nasdaq.group(America.yesterday), Nasdaq.group(America.close),
+        Nasdaq.group(America.high), Nasdaq.group(America.low), Nasdaq.group(America.volumn),
+        Nasdaq.group(America.money), recorder_time)
+
+        recorder_minute_time = Dji.group(America.time)[11:]
+        print(recorder_minute_time)
+
+        current_record = self.database.find_summary_info(item='max(time)')
+
+        if (str(current_record) < recorder_time and recorder_minute_time > '08:00:00' and recorder_minute_time < '16:00:00'):
+            self.database.insert_table(mysql.America.tablename_stock_america_summary_info, insert_data)
+        else:
+            debug.log_info('data has exists, cannot insert america summary data!')
+
 
 
 
 #
-# test = America()
+test = America()
 # test.get_stock_code_summary_info()
 
 
