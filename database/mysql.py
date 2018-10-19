@@ -81,6 +81,7 @@ class China(Stock):
 
     def __del__(self):
         self.disconnect_database()
+        print('sql end')
 
     def create_table(self, name, type):
         if (type == 'summary'):
@@ -115,34 +116,37 @@ class China(Stock):
             debug.log_error('get column data from database error ! ' + str(e))
 
 
-    def insert_table(self, name, type, data):
-        if (type == 'summary'):
-            sql = 'INSERT INTO ' + name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, hightime, lowtime, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
-            try:
-                debug.log_info (str(data))
-                self.cursor.execute(sql, data)
-                self.db.commit()
-            except Exception  as e:
-                debug.log_error('insert summary data error!' + str(e) + name)
-                self.db.rollback()
-        elif (type == 'basis'):
-            # 需要市盈率信息
-            sql = 'INSERT INTO ' + Stock.tablename_stock_basis_info + ' (code_id, lastyear_mgsy, fourQ_mgsy, mgjzc, totalcapital, currcapital, profit, profit_four, issue_price ) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
-            try:
-                self.cursor.execute(sql, data)
-                self.db.commit()
-            except Exception as e:
-                debug.log_error('insert basis data error!' + str(e) + name)
-                self.db.rollback()
-        elif (type == 'realtime'):
-            sql = 'INSERT INTO ' + name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
-            try:
-                self.cursor.execute(sql, data)
-                self.db.commit()
-            except Exception as e:
-                debug.log_error ('insert realtime data error!' + str(e) + name)
-                mail.send_mail('insert realtime data error!' + str(e) + name)
-                self.db.rollback()
+    def insert_summary_data(self, table_name, data):
+        sql = 'INSERT INTO ' + table_name + ' (open, yesterday, close, high, low, buy, sale, volumn, money, turnover, hightime, lowtime, time) values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        try:
+            debug.log_info(str(data))
+            self.cursor.execute(sql, data)
+            self.db.commit()
+        except Exception  as e:
+            debug.log_error('insert summary data error!' + str(e) + table_name)
+            self.db.rollback()
+
+
+    def insert_basis_data(self, data):
+        # 需要市盈率信息
+        #前一年每股收益合--最近四季度每股收益和--最近报告每股净资产--总股本--流通股本--最近年度净利润--最近四个季度净利润--发行价
+        sql = 'INSERT INTO ' + Stock.tablename_stock_basis_info + ' (code_id, lastyear_mgsy, fourQ_mgsy, mgjzc, totalcapital, currcapital, profit, profit_four, issue_price ) values(%s, %s, %s, %s, %s, %s, %s, %s, %s)'
+        try:
+            self.cursor.execute(sql, data)
+            self.db.commit()
+        except Exception as e:
+            debug.log_error('insert basis data error!' + str(e) + Stock.tablename_stock_basis_info)
+            self.db.rollback()
+
+    def insert_realtime_data(self, table_name, data):
+        sql = 'INSERT INTO ' + table_name + '(price, money, volumn, turnover, time) values(%s, %s, %s, %s, %s)'
+        try:
+            self.cursor.execute(sql, data)
+            self.db.commit()
+        except Exception as e:
+            debug.log_error ('insert realtime data error!' + str(e) + table_name)
+            mail.send_mail('insert realtime data error!' + str(e) + table_name)
+            self.db.rollback()
 
     def update_stock_basis_info(self, data):
         sql = 'UPDATE ' + Stock.tablename_stock_basis_info + ' SET totalcapital = %s, currcapital = %s WHERE code_id = %s'
@@ -208,7 +212,7 @@ class America(Stock):
             debug.log_error('create america table error ' + str(e))
 
 
-    def insert_table(self, name, data):
+    def insert_summary_data(self, name, data):
         sql = 'INSERT INTO ' + name + '(d_open, d_yesterday, d_close, d_high, d_low, d_volumn, d_money, n_open, n_yesterday, n_close, n_high, n_low, n_volumn, n_money, time) ' \
                                       'values(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)'
         try:

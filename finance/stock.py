@@ -174,7 +174,7 @@ class China(Stock):
                         if (str(item[4]) > str(item[4])[:-5] + '15:03'):
                             debug.log_warning ('data error ! forbid to insert')
                             break
-                        self.database.insert_table(table_name, 'realtime', item)
+                        self.database.insert_realtime_data(table_name, item)
 
                 # for key, value in self.all_code_today_info.items():
                 #     if(float(value[0]) != 0):
@@ -208,7 +208,7 @@ class China(Stock):
                                    code_item_result.group(5), code_item_result.group(7), code_item_result.group(8),
                                    code_item_result.group(12), code_item_result.group(13), code_item_result.group(14))
                     print (insert_data)
-                    self.database.insert_table(mysql.Stock.tablename_stock_basis_info, 'basis', insert_data)
+                    self.database.insert_basis_data(insert_data)
                     # self.database.update_stock_basis_info((code_item_result.group(7),code_item_result.group(8),code_item_result.group(1)))
                 else:
                     print (code_item_result.group(1), code_item_result.group(2), code_item_result.group(3),
@@ -262,7 +262,7 @@ class China(Stock):
                                                                 content='time = ' + re.sub('-', '',
                                                                                            code_item_result.group(13)))
                     if (database_date == None):
-                        self.database.insert_table(current_code_id + '_summary', 'summary', insert_data)
+                        self.database.insert_summary_data(current_code_id + '_summary', insert_data)
                         debug.log_info ('insert data high low!!!')
                         print(insert_data)
                     else:
@@ -395,7 +395,7 @@ class America(Stock):
         current_record = self.database.find_summary_info(item='max(time)')
 
         if (str(current_record) < recorder_time and recorder_minute_time > '08:00:00' and recorder_minute_time < '16:00:00'):
-            self.database.insert_table(mysql.America.tablename_stock_america_summary_info, insert_data)
+            self.database.insert_summary_data(mysql.America.tablename_stock_america_summary_info, insert_data)
         else:
             debug.log_info('data has exists, cannot insert america summary data!')
 
