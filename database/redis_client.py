@@ -23,6 +23,7 @@ class Stock(Database):
 
 
 class China(Stock):
+    #get all summary data
     mysql_china = mysql.China()
     all_code_id = mysql_china.get_column_data_from_database('code_id', mysql.Stock.tablename_stock_basis_info)
     for sub_code_id in all_code_id:
@@ -34,7 +35,9 @@ class China(Stock):
             stock_id = 'sh' + code_id
         current_currcapital = mysql_china.find_stock_basis_from_database(code_id, item='currcapital', content='code_id = ' + code_id)
         Database.database.hmset(code_id,{'stock_id': stock_id, "currcapital": current_currcapital})
-    print(Database.database.hgetall('002202'))
+
+
+
 
     def __init__(self):
         pass
@@ -43,7 +46,17 @@ class China(Stock):
         pass
 
     def insert_data(self, *args, **kwargs):
-        Database.database.mset(kwargs ,ex= 10)
+        # Database.database.mset(kwargs ,ex= 86000)
+        pass
+
+    def insert_realtime_date(self, *args, **kwargs):
+        pass
+
+    def get_basis_data(self):
+        pass
+
+    def get_summary_data(self, *args, **kwargs):
+        pass
 
 
     # print()
