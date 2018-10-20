@@ -4,6 +4,7 @@ import time
 import csv
 from time import sleep
 from database import mysql
+from database import data_base
 from smtp import mail
 from tool import debug
 #待修改地方
@@ -24,6 +25,8 @@ class Stock:
         pass
 
 
+
+
 class China(Stock):
     'china stock'
 
@@ -34,18 +37,13 @@ class China(Stock):
     code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
     code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 
-    code_all_id = mysql.China().get_column_data_from_database('code_id', mysql.Stock.tablename_stock_basis_info)
-
+    code_all_id = data_base.China.get_all_code_id()
 #考虑修饰符
     for item_id in code_all_id:
-        code_id_item = str(item_id[0].zfill(6))
-        if (code_id_item[0] == '0' or code_id_item[0] == '3'):
-            code_id_item = 'sz' + code_id_item
-        else:
-            code_id_item = 'sh' + code_id_item
-        if (code_index == 600):
+        code_id_item = data_base.China.get_basis_data(item_id, data_base.China.stock_id)
+        if (code_index == 601):
             code_index = 0
-            current_code = code_id_item
+            current_code = code_id_item[0]
             code_list = code_list + current_code
             code_basis_list = code_basis_list + current_code + '_i'
             all_code_list.append(code_list)
@@ -54,14 +52,15 @@ class China(Stock):
             code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 
         else:
-            current_code = code_id_item
+            current_code = code_id_item[0]
             code_list = code_list + current_code + ','
             code_basis_list = code_basis_list + current_code + '_i' + ','
             code_index = code_index + 1
 
     all_code_list.append(code_list)
     all_code_basis_list.append(code_basis_list)
-
+    print(all_code_list)
+    print(all_code_basis_list)
 
     def __init__(self):
         self.database = mysql.China()
@@ -347,6 +346,7 @@ class China(Stock):
 
         return
 
+test = China()
 
 
 class America(Stock):

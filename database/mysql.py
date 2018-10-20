@@ -16,6 +16,7 @@ class Database:
         try:
             self.db = pymysql.connect(host='localhost', user='root', password='123456', port=3306, db='stock_info')
             self.cursor = self.db.cursor()
+
         except Exception as e:
             debug.log_error(' connect database error! '+ str(e))
 
@@ -81,7 +82,6 @@ class China(Stock):
 
     def __del__(self):
         self.disconnect_database()
-        print('sql end')
 
     def create_table(self, name, type):
         if (type == 'summary'):
