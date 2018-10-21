@@ -30,7 +30,7 @@ def get_realtime_stock_info():
 
         if (current_time > am_start_time and current_time < am_end_time):
             china_stock = stock.China()
-            china_stock.get_stock_codes_info(current_time=debug.current_time())
+            china_stock.get_stock_codes_info()
             break
         sleep(30)
 

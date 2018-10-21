@@ -44,10 +44,19 @@ class China(Stock):
 
     @staticmethod
     def get_basis_data(code_id, *args, **kwargs):
-        return redis_client.China.get_basis_data(code_id, args, kwargs)
+        if(len(args) == 1):
+            return redis_client.China.get_basis_data(code_id, args, kwargs)[0]
+        else:
+            return redis_client.China.get_basis_data(code_id, args, kwargs)
 
+    @staticmethod
     def get_summary_data(self, code_id, time, *args, **kwargs):
-        pass
+        redis_client.China.get_summary_data(code_id, time, args, kwargs)
+
+    @staticmethod
+    def insert_realtime_data(code_id, data):
+        redis_client.China.insert_realtime_data(code_id, data)
+
 
 class America(Stock):
 

@@ -4,7 +4,6 @@ from smtp import mail
 from tool import debug
 
 
-
 class Database:
     def __init__(self):
         self.connect_database()

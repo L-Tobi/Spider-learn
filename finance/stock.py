@@ -10,10 +10,8 @@ from tool import debug
 #待修改地方
 #防止网络意外退出功能, 将数据优先写入本地磁盘
 #修改创建表的地方，避免每天都检测是否创建一次
-#进一步优化实时存储数据
 #每天更新股票数量
 #将异常语句弄成修饰符
-#数据将先写入redis后写入mysql
 
 class Stock:
     'base class of stock'
@@ -38,7 +36,6 @@ class China(Stock):
     code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 
     code_all_id = data_base.China.get_all_code_id()
-#考虑修饰符
     for item_id in code_all_id:
         code_id_item = data_base.China.get_basis_data(item_id, data_base.China.stock_id)
         if (code_index == 601):
@@ -59,8 +56,6 @@ class China(Stock):
 
     all_code_list.append(code_list)
     all_code_basis_list.append(code_basis_list)
-    print(all_code_list)
-    print(all_code_basis_list)
 
     def __init__(self):
         self.database = mysql.China()
@@ -70,26 +65,27 @@ class China(Stock):
         self.all_code_today_info = {}
 
 
-    def get_stock_codes_info(self, current_time):
+    def get_stock_codes_info(self):
         debug.log_info('start code info !')
         time_change = True
         minute_data = []
         today_data = []
         all_code_compare_time = {}
-        all_code_real_price = {}
+        # all_code_real_price = {}
         all_code_real_price_temp = {}
         all_code_currcapital = {}
 
 
-        code_all_id = mysql.China().get_column_data_from_database('code_id', mysql.Stock.tablename_stock_basis_info)
+        # code_all_id = mysql.China().get_column_data_from_database('code_id', mysql.Stock.tablename_stock_basis_info)
         # 考虑修饰符
-        for item_id in code_all_id:
-            code_id_item = str(item_id[0].zfill(6))
-            all_code_currcapital[code_id_item] = self.database.find_stock_basis_from_database(code_id_item, item='currcapital', content='code_id = ' + code_id_item)
-            self.all_code_today_info[code_id_item] = [0, '1991-06-18 00:00', 100000, '1991-06-18 00:00']
-            all_code_real_price[code_id_item] = []
-            all_code_real_price_temp[code_id_item] = [0, 0, 0, 0, current_time]
-            all_code_compare_time[code_id_item] = [True, current_time]
+        for item_id in China.code_all_id:
+            # code_id_item = str(item_id[0].zfill(6))
+            # all_code_currcapital[code_id_item] = self.database.find_stock_basis_from_database(code_id_item, item='currcapital', content='code_id = ' + code_id_item)
+            all_code_currcapital[item_id] = data_base.China.get_basis_data(item_id, data_base.China.currcapital)
+            self.all_code_today_info[item_id] = [0, '1991-06-18 00:00', 100000, '1991-06-18 00:00']
+            # all_code_real_price[item_id] = []
+            all_code_real_price_temp[item_id] = [0, 0, 0, 0, debug.current_time]
+            all_code_compare_time[item_id] = [True, debug.current_time]
 
         debug.log_info('start record realtime!')
         while (True):
@@ -134,13 +130,15 @@ class China(Stock):
                         all_code_compare_time[code_item_result.group(1)][0] = True
 
                         if (float(all_code_real_price_temp[code_item_result.group(1)][0]) != 0):
+
                             final_data = (all_code_real_price_temp[code_item_result.group(1)][0],
                                           all_code_real_price_temp[code_item_result.group(1)][1],
                                           all_code_real_price_temp[code_item_result.group(1)][2],
                                           all_code_real_price_temp[code_item_result.group(1)][3],
                                           all_code_real_price_temp[code_item_result.group(1)][4])
 
-                            all_code_real_price[code_item_result.group(1)].append(final_data)
+                            data_base.China.insert_realtime_data(code_item_result.group(1), final_data)
+                            # all_code_real_price[code_item_result.group(1)].append(final_data)
 
                     currcapital = all_code_currcapital[code_item_result.group(1)]
                     volumn = float(code_item_result.group(9))
@@ -157,6 +155,7 @@ class China(Stock):
                     all_code_real_price_temp[code_item_result.group(1)][2] = volumn
                     all_code_real_price_temp[code_item_result.group(1)][4] = record_time[:-3]
 
+
                 sleep(2)
             if (time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) > time.strftime("%Y-%m-%d ", time.localtime()) + '15:02:20'):
                 debug.log_info('start record code summary info')
@@ -166,27 +165,25 @@ class China(Stock):
                 usa = America()
                 usa.get_stock_code_summary_info()
                 # if database last store time < now current collect data
-                for keys, values in all_code_real_price.items():
-                    table_name = keys + '_realtime_' + time.strftime("%Y", time.localtime())
-                    # self.database.create_table(table_name, 'realtime')
-                    for item in values:
-                        if (str(item[4]) > str(item[4])[:-5] + '15:03'):
-                            debug.log_warning ('data error ! forbid to insert')
-                            break
-                        self.database.insert_realtime_data(table_name, item)
+                #
+                # for keys, values in all_code_real_price.items():
+                #     table_name = keys + '_realtime_' + time.strftime("%Y", time.localtime())
+                #     # self.database.create_table(table_name, 'realtime')
+                #     for item in values:
+                #         if (str(item[4]) > str(item[4])[:-5] + '15:03'):
+                #             debug.log_warning ('data error ! forbid to insert')
+                #             break
+                #         self.database.insert_realtime_data(table_name, item)
+                #
 
-                # for key, value in self.all_code_today_info.items():
-                #     if(float(value[0]) != 0):
-                #         # here update high and low data into summary table
-                #         print('insert high and low data ', key, value, type(key), type(value))
+
 
                 debug.log_info ('insert realtime end ' + time.strftime('%Y-%m-%d %H:%M:%S', time.localtime()))
                 break
             sleep(6)
-            print(all_code_real_price['002202'])
+            # print(all_code_real_price['002202'])
 
-    def get_stock_code_id_from_database(self):
-        self.database
+
 
     def get_stock_code_basis_info(self, is_store_data=False):
         self.database.create_table(self.database_cursor, 'stock_basis_info', 'basis')
@@ -233,15 +230,19 @@ class China(Stock):
 
                     current_code_id = code_item_result.group(1)
                     # open,yesterday,close,high,low,buy,sale,volumn,money
-                    currcapital = self.database.find_stock_basis_from_database(current_code_id,
-                                                              item='currcapital',
-                                                              content='code_id = ' + current_code_id)
+                    #
+                    #
+                    #
+                    currcapital = data_base.China.get_basis_data(current_code_id, data_base.China.currcapital)
+                    # self.database.find_stock_basis_from_database(current_code_id,
+                    #                                           item='currcapital',
+                    #                                           content='code_id = ' + current_code_id)
 
                     volumn = float(code_item_result.group(9))
-                    if (currcapital == 0):
+                    if (float(currcapital)  == 0):
                         turnover = 0
                     else:
-                        turnover = volumn / currcapital / 100
+                        turnover = volumn / float(currcapital) / 100
 
                     high_time = ''
                     low_time = ''
@@ -346,7 +347,6 @@ class China(Stock):
 
         return
 
-test = China()
 
 
 class America(Stock):
@@ -400,8 +400,16 @@ class America(Stock):
             debug.log_info('data has exists, cannot insert america summary data!')
 
 
+#
 
-
+# a = data_base.China.get_basis_data('002202', data_base.China.currcapital)
+# print( a , type(a))
+# test = China()
+# while(True):
+#     data_base.China.insert_realtime_data('000001', ('19.2', '312938', '123123131', 'eqeqe', '2018-10-21 22:13'))
+#     data_base.China.insert_realtime_data('002202',('9.2','12938','123123131','eqeqe','2018-10-21 22:13'))
+#     data_base.China.insert_realtime_data('002202', ('9.3', '678686', '13131313', 'eqeqe', '2018-10-21 22:14'))
+#     sleep(10)
 #
 # test = America()
 # test.get_stock_code_summary_info()
