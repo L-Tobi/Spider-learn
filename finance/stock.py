@@ -12,6 +12,7 @@ from tool import debug
 #修改创建表的地方，避免每天都检测是否创建一次
 #每天更新股票数量
 #将异常语句弄成修饰符
+#准备分布式设计代码，防止主机因为网络等其他客观问题造成当天无法收集数据
 
 class Stock:
     'base class of stock'
@@ -36,11 +37,12 @@ class China(Stock):
     code_basis_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 
     code_all_id = data_base.China.get_all_code_id()
+
     for item_id in code_all_id:
         code_id_item = data_base.China.get_basis_data(item_id, data_base.China.stock_id)
         if (code_index == 601):
             code_index = 0
-            current_code = code_id_item[0]
+            current_code = code_id_item
             code_list = code_list + current_code
             code_basis_list = code_basis_list + current_code + '_i'
             all_code_list.append(code_list)
@@ -49,7 +51,7 @@ class China(Stock):
             code_list = 'https://hq.sinajs.cn/?rn=1534081330022&list='
 
         else:
-            current_code = code_id_item[0]
+            current_code = code_id_item
             code_list = code_list + current_code + ','
             code_basis_list = code_basis_list + current_code + '_i' + ','
             code_index = code_index + 1
@@ -140,7 +142,7 @@ class China(Stock):
                             data_base.China.insert_realtime_data(code_item_result.group(1), final_data)
                             # all_code_real_price[code_item_result.group(1)].append(final_data)
 
-                    currcapital = all_code_currcapital[code_item_result.group(1)]
+                    currcapital = float(all_code_currcapital[code_item_result.group(1)])
                     volumn = float(code_item_result.group(9))
                     money = float(code_item_result.group(10))
                     if (currcapital == 0):
@@ -218,6 +220,7 @@ class China(Stock):
         for code_list_item in China.all_code_list:
             current_code_info = requests.get(code_list_item, timeout=(6.1,10))
             code_results = current_code_info.text.split(';')
+            print(code_list_item)
             for code_item in code_results:
                 if (code_item == '\n'):
                     break
@@ -226,6 +229,7 @@ class China(Stock):
                     code_item, re.S)
                 if (code_item_result == None):
                     continue
+
                 if (is_store_data):
 
                     current_code_id = code_item_result.group(1)
@@ -261,6 +265,7 @@ class China(Stock):
                     database_date = self.database.find_stock_summary_from_database(current_code_id, item='time',
                                                                 content='time = ' + re.sub('-', '',
                                                                                            code_item_result.group(13)))
+
                     if (database_date == None):
                         self.database.insert_summary_data(current_code_id + '_summary', insert_data)
                         debug.log_info ('insert data high low!!!')

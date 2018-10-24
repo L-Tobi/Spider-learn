@@ -81,8 +81,6 @@ class China(Stock):
     __every_summary_length = 5
 
 
-
-
     def __init__(self):
         pass
 
@@ -148,7 +146,7 @@ def mysql_operation_thread():
             realtime_redis_name = item_id + 'realtime_hash'
             if(Database.database.llen(realtime_redis_name) > 0):
                 table_name = item_id + '_realtime_' + time.strftime("%Y", time.localtime())
-                for insert_sub_item in Database.database.lrange(realtime_redis_name, 0, 1):
+                for insert_sub_item in Database.database.lrange(realtime_redis_name, 0, -1):
                     insert_data = eval(insert_sub_item)
                     mysql_china.insert_realtime_data(table_name, insert_data)
                     Database.database.lpop(realtime_redis_name)

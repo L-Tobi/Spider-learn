@@ -13,7 +13,7 @@ from database import mysql
 from tool import debug
 
 
-am_start_time = debug.current_time('day') + ' 09:25:00'
+am_start_time = debug.current_time('day') + ' 09:29:00'
 am_end_time = debug.current_time('day') + ' 11:31:00'
 
 collect_summary_data = True
