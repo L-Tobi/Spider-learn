@@ -142,15 +142,20 @@ def mysql_operation_thread():
     all_code_id = China.get_all_code_id()
     mysql_china = mysql.China()
     while(True):
+        is_end = True
         for item_id in all_code_id:
             realtime_redis_name = item_id + 'realtime_hash'
             if(Database.database.llen(realtime_redis_name) > 0):
+                is_end = False
                 table_name = item_id + '_realtime_' + time.strftime("%Y", time.localtime())
                 for insert_sub_item in Database.database.lrange(realtime_redis_name, 0, -1):
                     insert_data = eval(insert_sub_item)
                     mysql_china.insert_realtime_data(table_name, insert_data)
                     Database.database.lpop(realtime_redis_name)
-
+        if(is_end):
+            debug.log_info('insert realtime end ')
+            debug.log_info(debug.current_time())
+            time.sleep(60)
         # if(debug.current_time() > debug.current_time(format=debug.time_format['day']) + '15:03:00'
         # and ):
 
