@@ -1,7 +1,6 @@
 import requests
 import re
 import time
-import csv
 from time import sleep
 from database import mysql
 from database import data_base
